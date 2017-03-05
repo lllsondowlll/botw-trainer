@@ -184,8 +184,12 @@
                     Name = end.ToString("X"),
                     Page = Convert.ToInt32(page),
                     Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
-                    Value = this.tcpGecko.peek(end + 0x8)
+                    Value = this.tcpGecko.peek(end + 0x8),
+                    Equipped = this.tcpGecko.peek(end + 0xC),
+                    ModAmount = this.tcpGecko.peek(end + 0x5C),
+                    ModType = this.tcpGecko.peek(end + 0x64),
                 };
+
                 this.items.Add(item);
 
                 end -= 0x220;
@@ -226,6 +230,9 @@
                 paragraph.Inlines.Add(" | Page: " + item.Page);
                 paragraph.Inlines.Add(" | ?: " + item.Unknown);
                 paragraph.Inlines.Add(" | Value: " + item.Value);
+                paragraph.Inlines.Add(" | Equipped: " + item.Equipped.ToString("X"));
+                paragraph.Inlines.Add(" | Mod Amt.: " + item.ModAmount.ToString("X"));
+                paragraph.Inlines.Add(" | Mod Type: " + item.ModType.ToString("X"));
 
                 DebugLog.Document.Blocks.Add(paragraph);
             }
@@ -235,7 +242,7 @@
             this.StaminaData.Content = string.Format("[0x42439594 = {0}, 0x42439598 = {1}]", stamina1, stamina2);
 
             var health = this.tcpGecko.peek(0x439B6558);
-            this.HealthData.Content = string.Format("Wrong address - 0x439B6558 = {0}", health);
+            this.HealthData.Content = string.Format("0x439B6558 = {0}", health);
 
             var run = this.tcpGecko.peek(0x43A88CC4).ToString("X");
             this.RunData.Content = string.Format("Wrong address - 0x43A88CC4 = {0}", run);
