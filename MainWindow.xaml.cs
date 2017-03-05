@@ -15,10 +15,14 @@
     /// </summary>
     public partial class MainWindow : Window
     {
+        // The original list of values that take effect when you save / load
         private const uint SaveItemStart = 0x3FCE7FF0;
 
+        // Technically your first item as they are stored in reverse so we work backwards
         private const uint ItemEnd = 0x43CA2AEC;
 
+        // 0x140 (320) is the amount of items to search for in memory. Over estimating at this point.
+        // We start at the end and go back in jumps of 0x220 getting data 320 times
         private const uint ItemStart = ItemEnd - (0x140 * 0x220);
 
         private TCPGecko tcpGecko;
@@ -176,6 +180,7 @@
 
             while (end >= ItemStart)
             {
+                // If we start to hit FFFFFFFF then we break as its the end of the items
                 var page = this.tcpGecko.peek(end);
                 if (page > 9)
                 {
@@ -217,10 +222,12 @@
 
         private void DebugData()
         {
+            // Debug Grid data
             DebugGrid.ItemsSource = this.items;
 
             DebugIntro.Content = string.Format("Showing {0} items", this.items.Count);
 
+            // Show extra info in 'Other' tab to see if our cheats are looking in the correct place
             var stamina1 = this.tcpGecko.peek(0x42439594).ToString("X");
             var stamina2 = this.tcpGecko.peek(0x42439598).ToString("X");
             this.StaminaData.Content = string.Format("[0x42439594 = {0}, 0x42439598 = {1}]", stamina1, stamina2);
@@ -244,9 +251,11 @@
 
         private void SaveClick(object sender, RoutedEventArgs e)
         {
+            // Grab the values from the relevant tab and  poke them back to memory
             var tab = (TabItem)TabControl.SelectedItem;
 
-            if (Equals(tab, this.Weapons) || Equals(tab, this.Shields) || Equals(tab, this.Armour) || Equals(tab, this.Debug))
+            // For these we amend the 0x3FCE7FF0 area which requires save/load
+            if (Equals(tab, this.Weapons) || Equals(tab, this.Shields))
             {
                 var weaponsList = this.items.Where(x => x.Page == 0).ToList();
                 var bowList = this.items.Where(x => x.Page == 1).ToList();
@@ -260,7 +269,7 @@
                         var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                         if (foundTextBox != null)
                         {
-                            uint offset = (uint)(SaveItemStart + (y * 0x8));
+                            var offset = (uint)(SaveItemStart + (y * 0x8));
 
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
@@ -270,12 +279,15 @@
 
                 if (Equals(tab, this.BowsArrows))
                 {
+                    // jump past weapons before we start
+                    y += weaponsList.Count;
+
                     foreach (var item in bowList)
                     {
                         var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                         if (foundTextBox != null)
                         {
-                            uint offset = (uint)(SaveItemStart + (y * 0x8));
+                            var offset = (uint)(SaveItemStart + (y * 0x8));
 
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
@@ -284,12 +296,14 @@
                 }
             }
 
+            // Here we can poke the values we see in Debug as it has and imemdiate effect
             if (Equals(tab, this.BowsArrows) || Equals(tab, this.Materials) || Equals(tab, this.Food) || Equals(tab, this.KeyItems))
             {
                 var page = 0;
 
                 if (Equals(tab, this.BowsArrows))
                 {
+                    // Just arrows
                     page = 2;
                 }
 
@@ -318,6 +332,7 @@
                 }
             }
 
+            // For the 'Other' tab we mimic JGecko and send cheats to codehandler
             if (Equals(tab, this.Other))
             {
                 var selected = new List<Cheat>();
@@ -354,12 +369,13 @@
             Code Handler Enabled Address = 10014CFC
             */
 
+            // Disable codehandler before we modify
             this.tcpGecko.poke32(0x10014CFC, 0x00000000);
 
             uint start = 0x01133000;
             uint end = 01134300;
 
-            // clear current
+            // clear current codes
             var c = start;
             while (c <= end)
             {
@@ -369,6 +385,7 @@
 
             var codes = new List<uint>();
 
+            // TODO: These are all 32 bit writes so move first and list line of each to loop at the end to avoid duplicating them
             if (cheats.Contains(Cheat.Stamina))
             {
                 codes.Add(0x00020000);
@@ -418,12 +435,14 @@
                 codes.Add(0x00000000);
             }
 
+            // Write our selected codes 
             foreach (var code in codes)
             {
                 this.tcpGecko.poke32(start, code);
                 start += 0x4;
             }
 
+            // Re-enable codehandler
             this.tcpGecko.poke32(0x10014CFC, 0x00000001);
         }
 
