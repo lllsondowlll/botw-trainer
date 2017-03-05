@@ -1,7 +1,5 @@
-﻿namespace WiiUTrainer
+﻿namespace BotwTrainer
 {
-    using System;
-
     public class Item
     {
         public uint Address { get; set; }

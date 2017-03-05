@@ -1,4 +1,4 @@
-﻿namespace WiiUTrainer
+﻿namespace BotwTrainer
 {
     using System.Windows;
 

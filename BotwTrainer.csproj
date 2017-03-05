@@ -8,8 +8,8 @@
     <ProjectGuid>{E0ECA303-F598-4B3C-BA0F-B2EDB0480EE1}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WiiUTrainer</RootNamespace>
-    <AssemblyName>WiiUTrainer</AssemblyName>
+    <RootNamespace>BotwTrainer</RootNamespace>
+    <AssemblyName>BotwTrainer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -52,9 +52,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>35DBF97323B4A1B55296163E67200EE6267471B1</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>WiiUTrainer_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>

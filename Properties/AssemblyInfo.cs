@@ -4,14 +4,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-// General Information about an assembly is controlled through the following 
+// General Information about an assembly is controlled through the following D:\Wii U\BotwTrainer\Properties\AssemblyInfo.cs
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WiiUTrainer")]
+[assembly: AssemblyTitle("BotwTrainer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WiiUTrainer")]
+[assembly: AssemblyProduct("BotwTrainer")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

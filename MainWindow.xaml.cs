@@ -1,4 +1,4 @@
-﻿namespace WiiUTrainer
+﻿namespace BotwTrainer
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,9 @@
     using System.Windows.Documents;
     using System.Windows.Input;
 
-    using WiiUTrainer.Properties;
+    using BotwTrainer;
+
+    using BotwTrainer.Properties;
 
     /// <summary>
     /// Interaction logic for MainWindow

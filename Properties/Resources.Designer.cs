@@ -8,7 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WiiUTrainer.Properties {
+namespace BotwTrainer.Properties
+{
     using System;
     
     
