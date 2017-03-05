@@ -1,0 +1,73 @@
+﻿<Window x:Class="WiiUTrainer.MainWindow"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+        Title="BOTW Trainer (PAL v1.1)" Height="600" Width="800" ResizeMode="NoResize">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Canvas Grid.Row="0" Margin="0">
+            <TextBox x:Name="IpAddress" HorizontalAlignment="Left" Height="21" Margin="30,15,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100"/>
+            <Button x:Name="Connect" Content="Connect" HorizontalAlignment="Left" Margin="155,15,0,0" VerticalAlignment="Top" Width="75" Click="ConnectClick" />
+            <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="255,15,0,0" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False"/>
+        </Canvas>
+
+        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="420" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
+
+            <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0" />
+
+            <TabItem Header="Bows and Arrows" x:Name="BowsArrows" Margin="0,0,0,0" />
+
+            <TabItem Header="Shields" x:Name="Shields" Margin="0,0,0,0" />
+
+            <TabItem Header="Armour" x:Name="Armour" Margin="0,0,0,0" />
+
+            <TabItem Header="Materials" x:Name="Materials" Margin="0,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="MaterialsContent" Margin="0" />
+            </TabItem>
+
+            <TabItem Header="Food" x:Name="Food" Margin="0,0,0,0" />
+
+            <TabItem Header="Key Items" x:Name="KeyItems" Margin="0,0,0,0" />
+
+            <TabItem Header="Other" x:Name="Other" Margin="0,0,0,0">
+                <Canvas>
+                    <Label Content="Stamina" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="10"></Label>
+                    <CheckBox x:Name="Stamina" Margin="0" Canvas.Left="130" Canvas.Top="16"/>
+
+                    <Label Content="Health" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="40"></Label>
+                    <CheckBox x:Name="Health" Margin="0" Canvas.Left="130" Canvas.Top="46"/>
+
+                    <Label Content="Run" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="70"></Label>
+                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="76" />
+
+                    <Label Content="Rupees" Height="25" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="100"></Label>
+                    <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="130" Canvas.Top="106" />
+                    <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="101" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                </Canvas>
+            </TabItem>
+
+            <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0" >
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0">
+                    <RichTextBox Margin="0" Name="DebugLog" IsReadOnly="True" IsDocumentEnabled="True"/>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+
+        <Canvas Grid.Row="2" Margin="0">
+            <Button x:Name="Refresh" Content="Refresh" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="RefreshClick" Canvas.Left="10" Canvas.Top="10" IsEnabled="False" />
+
+            <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="SaveClick" Canvas.Left="109" Canvas.Top="10" IsEnabled="False" />
+
+
+        </Canvas>
+    </Grid>
+</Window>
