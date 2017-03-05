@@ -10,7 +10,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="15"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Canvas Grid.Row="0" Margin="0">
@@ -55,7 +56,7 @@
                     <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="84"/>
 
                     <Label Content="Run" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="114"></Label>
-                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="120" IsEnabled="False" />
+                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="120" />
                     <Label x:Name="RunData" Content="RunData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="114"/>
 
                     <Label Content="Rupees" Height="25" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="144"></Label>
@@ -90,7 +91,11 @@
         <Canvas Grid.Row="2" Margin="0">
             <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="10" Canvas.Top="10" IsEnabled="False" />
 
+            <Button x:Name="Refresh" Content="Refresh" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="RefreshClick" Canvas.Left="10" Canvas.Top="10" Visibility="Hidden" />
+
             <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="SaveClick" Canvas.Left="109" Canvas.Top="10" IsEnabled="False" />
         </Canvas>
+
+        <ProgressBar Height="15" Name="Progress" Grid.Row="3" Foreground="#FF138127" />
     </Grid>
 </Window>

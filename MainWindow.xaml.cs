@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -42,6 +43,8 @@
             this.InitializeComponent();
 
             IpAddress.Text = Settings.Default.IpAddress;
+
+            this.items = new List<Item>();
         }
 
         private enum Cheat
@@ -79,20 +82,6 @@
             }
         }
 
-        private void ToggleControls()
-        {
-            this.IpAddress.IsEnabled = !this.connected;
-            this.Connect.IsEnabled = !this.connected;
-            this.Disconnect.IsEnabled = this.connected;
-            this.TabControl.IsEnabled = this.connected;
-            this.Load.IsEnabled = this.connected;
-
-            if (!this.connected)
-            {
-                Save.IsEnabled = false;
-            }
-        }
-
         private void DisconnectClick(object sender, RoutedEventArgs e)
         {
             try
@@ -104,6 +93,66 @@
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private async void LoadClick(object sender, RoutedEventArgs e)
+        {
+            ((Button)sender).IsEnabled = false;
+
+            var result = await Task.Run(() => this.LoadDataAsync());
+
+            if (result)
+            {
+                this.Load.Visibility = Visibility.Hidden;
+                this.Refresh.Visibility = Visibility.Visible;
+
+                this.DebugData();
+
+                this.LoadTab(this.Weapons, new[] { 0 });
+                this.LoadTab(this.BowsArrows, new[] { 1, 2 });
+                this.LoadTab(this.Shields, new[] { 3 });
+                this.LoadTab(this.Armour, new[] { 4, 5, 6 });
+                this.LoadTab(this.Materials, new[] { 7 });
+                this.LoadTab(this.Food, new[] { 8 });
+                this.LoadTab(this.KeyItems, new[] { 9 });
+
+                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString();
+
+                this.Save.IsEnabled = true;
+
+                this.dataLoaded = true;
+
+                MessageBox.Show("Data Loaded");
+            }
+        }
+
+        private async void RefreshClick(object sender, RoutedEventArgs e)
+        {
+            Progress.Value = 0;
+            Save.IsEnabled = false;
+
+            var result = await Task.Run(() => this.LoadDataAsync());
+
+            if (result)
+            {
+                foreach (var item in this.items)
+                {
+                    var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                    if (foundTextBox != null)
+                    {
+                        var value = item.Value;
+                        if (value > int.MaxValue)
+                        {
+                            value = 0;
+                        }
+
+                        foundTextBox.Text = value.ToString();
+                    }
+                }
+
+                MessageBox.Show("Data Refreshed");
+                Save.IsEnabled = true;
             }
         }
 
@@ -171,57 +220,61 @@
             tab.Content = panel;
         }
 
-        private void LoadData()
+        private bool LoadDataAsync()
         {
-            if (this.dataLoaded)
+            Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
+
+            try
             {
-                // Refresh?
-            }
+                var x = 0;
 
-            this.items = new List<Item>();
+                uint end = ItemEnd;
 
-            uint end = ItemEnd;
-
-            while (end >= ItemStart)
-            {
-                // If we start to hit FFFFFFFF then we break as its the end of the items
-                var page = this.tcpGecko.peek(end);
-                if (page > 9)
+                while (end >= ItemStart)
                 {
-                    break;
+                    // If we start to hit FFFFFFFF then we break as its the end of the items
+                    var page = this.tcpGecko.peek(end);
+                    if (page > 9)
+                    {
+                        Dispatcher.Invoke(() => this.UpdateProgress(100));
+                        break;
+                    }
+
+                    var item = new Item
+                    {
+                        Address = end,
+                        Page = Convert.ToInt32(page),
+                        Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
+                        Value = this.tcpGecko.peek(end + 0x8),
+                        Equipped = this.tcpGecko.peek(end + 0xC),
+                        ModAmount = this.tcpGecko.peek(end + 0x5C),
+                        ModType = this.tcpGecko.peek(end + 0x64),
+                    };
+
+                    this.items.Add(item);
+
+                    Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", x); });
+
+                    var currentPercent = (100m / 320m) * x;
+                    Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
+
+                    end -= 0x220;
+                    x++;
                 }
 
-                var item = new Item
-                {
-                    Address = end,
-                    Page = Convert.ToInt32(page),
-                    Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
-                    Value = this.tcpGecko.peek(end + 0x8),
-                    Equipped = this.tcpGecko.peek(end + 0xC),
-                    ModAmount = this.tcpGecko.peek(end + 0x5C),
-                    ModType = this.tcpGecko.peek(end + 0x64),
-                };
-
-                this.items.Add(item);
-
-                end -= 0x220;
+                return true;
             }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() => { Continue.Content = ex.Message; });
+                return false;
+            }
+        }
 
-            this.DebugData();
+        private void UpdateProgress(int percent)
+        {
 
-            this.LoadTab(this.Weapons, new[] { 0 });
-            this.LoadTab(this.BowsArrows, new[] { 1, 2 });
-            this.LoadTab(this.Shields, new[] { 3 });
-            this.LoadTab(this.Armour, new[] { 4, 5, 6 });
-            this.LoadTab(this.Materials, new[] { 7 });
-            this.LoadTab(this.Food, new[] { 8 });
-            this.LoadTab(this.KeyItems, new[] { 9 });
-
-            CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString();
-
-            this.Save.IsEnabled = true;
-
-            this.dataLoaded = true;
+            Progress.Value = percent;
         }
 
         private void DebugData()
@@ -246,11 +299,6 @@
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
             var rupee3 = this.tcpGecko.peek(0x40E57E78);
             this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}, 0x40E57E78 = {2}]", rupee1, rupee2, rupee3);
-        }
-
-        private void LoadClick(object sender, RoutedEventArgs e)
-        {
-            this.LoadData();
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -446,6 +494,20 @@
 
             // Re-enable codehandler
             this.tcpGecko.poke32(0x10014CFC, 0x00000001);
+        }
+
+        private void ToggleControls()
+        {
+            this.IpAddress.IsEnabled = !this.connected;
+            this.Connect.IsEnabled = !this.connected;
+            this.Disconnect.IsEnabled = this.connected;
+            this.TabControl.IsEnabled = this.connected;
+            this.Load.IsEnabled = this.connected;
+
+            if (!this.connected)
+            {
+                Save.IsEnabled = false;
+            }
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
