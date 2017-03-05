@@ -30,13 +30,11 @@
 
         private const uint CodeHandlerEnd = 0x01134300;
 
+        private readonly List<Item> items;
+
         private TCPGecko tcpGecko;
 
         private bool connected;
-
-        private bool dataLoaded;
-
-        private List<Item> items;
 
         public MainWindow()
         {
@@ -120,8 +118,6 @@
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString();
 
                 this.Save.IsEnabled = true;
-
-                this.dataLoaded = true;
 
                 MessageBox.Show("Data Loaded");
             }
@@ -307,16 +303,17 @@
             var tab = (TabItem)TabControl.SelectedItem;
 
             // For these we amend the 0x3FCE7FF0 area which requires save/load
-            if (Equals(tab, this.Weapons) || Equals(tab, this.Shields))
+            if (Equals(tab, this.Weapons) || Equals(tab, this.BowsArrows) || Equals(tab, this.Shields))
             {
-                var weaponsList = this.items.Where(x => x.Page == 0).ToList();
+                var weaponList = this.items.Where(x => x.Page == 0).ToList();
                 var bowList = this.items.Where(x => x.Page == 1).ToList();
+                var arrowList = this.items.Where(x => x.Page == 2).ToList();
                 var shieldList = this.items.Where(x => x.Page == 3).ToList();
 
                 var y = 0;
                 if (Equals(tab, this.Weapons))
                 {
-                    foreach (var item in weaponsList)
+                    foreach (var item in weaponList)
                     {
                         var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                         if (foundTextBox != null)
@@ -325,6 +322,7 @@
 
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
+
                         y++;
                     }
                 }
@@ -332,7 +330,7 @@
                 if (Equals(tab, this.BowsArrows))
                 {
                     // jump past weapons before we start
-                    y += weaponsList.Count;
+                    y += weaponList.Count;
 
                     foreach (var item in bowList)
                     {
@@ -343,9 +341,31 @@
 
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
+
                         y++;
                     }
                 }
+
+                if (Equals(tab, this.Shields))
+                {
+                    // jump past weapons/bows/arrows before we start
+                    y += weaponList.Count + bowList.Count + arrowList.Count;
+
+                    foreach (var item in shieldList)
+                    {
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                        if (foundTextBox != null)
+                        {
+                            var offset = (uint)(SaveItemStart + (y * 0x8));
+
+                            this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
+                        }
+
+                        y++;
+                    }
+                }
+
+                MessageBox.Show("Data sent. Please save/load the game");
             }
 
             // Here we can poke the values we see in Debug as it has and imemdiate effect
