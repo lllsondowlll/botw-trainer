@@ -1,11 +1,11 @@
-# Legend of Zelda: Breath of The Wild | Trainer
+# Legend of Zelda: Breath of The Wild | PAL Trainer
 Version Of The Game Needed: 1.1 (v33)
 
 ## About
 
-This is a Trainer made for: Legend of Zelda: Breath of The Wild
+This is a Trainer made for Legend of Zelda: Breath of The Wild
 
-This is not done yet and is still being improved. If you see a error in the code please make a issue.
+This is not done yet and is still being improved. If you see an error in the code please create an issue.
 
 ## How To Use
 
