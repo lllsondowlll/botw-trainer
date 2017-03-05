@@ -25,6 +25,10 @@
         // We start at the end and go back in jumps of 0x220 getting data 320 times
         private const uint ItemStart = ItemEnd - (0x140 * 0x220);
 
+        private const uint CodeHandlerStart = 0x01133000;
+
+        private const uint CodeHandlerEnd = 0x01134300;
+
         private TCPGecko tcpGecko;
 
         private bool connected;
@@ -372,15 +376,12 @@
             // Disable codehandler before we modify
             this.tcpGecko.poke32(0x10014CFC, 0x00000000);
 
-            uint start = 0x01133000;
-            uint end = 01134300;
-
             // clear current codes
-            var c = start;
-            while (c <= end)
+            var clear = CodeHandlerStart;
+            while (clear <= CodeHandlerEnd)
             {
-                this.tcpGecko.poke32(start, 0x0);
-                c += 0x4;
+                this.tcpGecko.poke32(clear, 0x0);
+                clear += 0x4;
             }
 
             var codes = new List<uint>();
@@ -435,11 +436,12 @@
                 codes.Add(0x00000000);
             }
 
-            // Write our selected codes 
+            // Write our selected codes
+            var address = CodeHandlerStart;
             foreach (var code in codes)
             {
-                this.tcpGecko.poke32(start, code);
-                start += 0x4;
+                this.tcpGecko.poke32(address, code);
+                address += 0x4;
             }
 
             // Re-enable codehandler
