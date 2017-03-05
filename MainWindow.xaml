@@ -66,10 +66,24 @@
                 </Canvas>
             </TabItem>
 
-            <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0" >
+            <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0">
+                <!--
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0">
                     <RichTextBox Margin="0" Name="DebugLog" IsReadOnly="True" IsDocumentEnabled="True"/>
                 </ScrollViewer>
+                -->
+                
+                <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Address" Binding="{Binding AddressHex}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Page" Binding="{Binding Page}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Unknown" Binding="{Binding Unknown}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Value" Binding="{Binding Value}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Equipped" Binding="{Binding EquippedHex}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Mod Amount" Binding="{Binding ModAmountHex}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Mod Type" Binding="{Binding ModTypeHex}"></DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </TabItem>
 
         </TabControl>

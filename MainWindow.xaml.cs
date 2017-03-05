@@ -62,9 +62,9 @@
                     this.Continue.Visibility = Visibility.Visible;
                 }
             }
-            catch (ETCPGeckoException)
+            catch (ETCPGeckoException ex)
             {
-                MessageBox.Show("text");
+                MessageBox.Show(ex.Message);
             }
             catch (System.Net.Sockets.SocketException)
             {
@@ -133,16 +133,16 @@
                                      Width = 60,
                                      Height = 22,
                                      Margin = new Thickness(0, 20, 10, 30),
-                                     Name = "Item_" + item.Name
+                                     Name = "Item_" + item.AddressHex
                                  };
-                    
-                    var check = (TextBox)this.FindName("Item_" + item.Name);
+
+                    var check = (TextBox)this.FindName("Item_" + item.AddressHex);
                     if (check != null)
                     {
-                        this.UnregisterName("Item_" + item.Name);
+                        this.UnregisterName("Item_" + item.AddressHex);
                     }
 
-                    this.RegisterName("Item_" + item.Name, tb);
+                    this.RegisterName("Item_" + item.AddressHex, tb);
 
                     panel.Children.Add(tb);
 
@@ -181,7 +181,6 @@
                 var item = new Item
                 {
                     Address = end,
-                    Name = end.ToString("X"),
                     Page = Convert.ToInt32(page),
                     Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
                     Value = this.tcpGecko.peek(end + 0x8),
@@ -214,9 +213,9 @@
 
         private void DebugData()
         {
-            DebugLog.Document.Blocks.Clear();
+            //DebugLog.Document.Blocks.Clear();
 
-            DebugLog.Document.Blocks.Add(new Paragraph(new Run("Total items: " + this.items.Count)));
+            //DebugLog.Document.Blocks.Add(new Paragraph(new Run("Total items: " + this.items.Count)));
 
             foreach (var item in this.items.OrderByDescending(x => x.Address))
             {
@@ -234,8 +233,11 @@
                 paragraph.Inlines.Add(" | Mod Amt.: " + item.ModAmount.ToString("X"));
                 paragraph.Inlines.Add(" | Mod Type: " + item.ModType.ToString("X"));
 
-                DebugLog.Document.Blocks.Add(paragraph);
+                //DebugLog.Document.Blocks.Add(paragraph);
             }
+
+            DebugGrid.ItemsSource = this.items;
+            
 
             var stamina1 = this.tcpGecko.peek(0x42439594).ToString("X");
             var stamina2 = this.tcpGecko.peek(0x42439598).ToString("X");
@@ -273,7 +275,7 @@
                 {
                     foreach (var item in weaponsList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.Name);
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                         if (foundTextBox != null)
                         {
                             uint offset = (uint)(SaveItemStart + (y * 0x8));
@@ -288,7 +290,7 @@
                 {
                     foreach (var item in bowList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.Name);
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                         if (foundTextBox != null)
                         {
                             uint offset = (uint)(SaveItemStart + (y * 0x8));
@@ -326,7 +328,7 @@
 
                 foreach (var item in this.items.Where(x => x.Page == page))
                 {
-                    var foundTextBox = (TextBox)this.FindName("Item_" + item.Name);
+                    var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
                     if (foundTextBox != null)
                     {
                         this.tcpGecko.poke32(item.Address + 0x8, Convert.ToUInt32(foundTextBox.Text));
@@ -389,12 +391,12 @@
             {
                 codes.Add(0x00020000);
                 codes.Add(0x42439594);
-                codes.Add(0x44FA0000);
+                codes.Add(0x453B8000);
                 codes.Add(0x00000000);
 
                 codes.Add(0x00020000);
                 codes.Add(0x42439598);
-                codes.Add(0x44FA0000);
+                codes.Add(0x453B8000);
                 codes.Add(0x00000000);
             }
 
