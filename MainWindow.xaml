@@ -21,7 +21,11 @@
 
         <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="420" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
 
-            <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0" />
+            <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0">
+                <StackPanel>
+                    <Label x:Name="Continue" Content="Click Load to continue" Visibility="Hidden"></Label>
+                </StackPanel>
+            </TabItem>
 
             <TabItem Header="Bows and Arrows" x:Name="BowsArrows" Margin="0,0,0,0" />
 
@@ -63,7 +67,7 @@
         </TabControl>
 
         <Canvas Grid.Row="2" Margin="0">
-            <Button x:Name="Refresh" Content="Refresh" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="RefreshClick" Canvas.Left="10" Canvas.Top="10" IsEnabled="False" />
+            <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="10" Canvas.Top="10" IsEnabled="False" />
 
             <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="SaveClick" Canvas.Left="109" Canvas.Top="10" IsEnabled="False" />
 

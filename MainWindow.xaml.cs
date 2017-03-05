@@ -9,8 +9,6 @@
     using System.Windows.Documents;
     using System.Windows.Input;
 
-    using BotwTrainer;
-
     using BotwTrainer.Properties;
 
     /// <summary>
@@ -28,21 +26,23 @@
 
         private bool connected = false;
 
-        private List<Item> items;
+        private bool dataLoaded = false;
 
-        private enum Cheat
-        {
-            Stamina,
-            Health,
-            Run,
-            Rupees
-        }
+        private List<Item> items;
 
         public MainWindow()
         {
             this.InitializeComponent();
 
             IpAddress.Text = Settings.Default.IpAddress;
+        }
+
+        private enum Cheat
+        {
+            Stamina = 0,
+            Health = 1,
+            Run = 2,
+            Rupees = 3
         }
 
         private void ConnectClick(object sender, RoutedEventArgs e)
@@ -55,11 +55,11 @@
 
                 if (this.connected)
                 {
-                    this.ToggleControls();
-                    this.LoadData();
-
                     Settings.Default.IpAddress = IpAddress.Text;
                     Settings.Default.Save();
+
+                    this.ToggleControls();
+                    this.Continue.Visibility = Visibility.Visible;
                 }
             }
             catch (ETCPGeckoException)
@@ -78,8 +78,12 @@
             this.Connect.IsEnabled = !this.connected;
             this.Disconnect.IsEnabled = this.connected;
             this.TabControl.IsEnabled = this.connected;
-            this.Save.IsEnabled = this.connected;
-            this.Refresh.IsEnabled = false; //this.connected;
+            this.Load.IsEnabled = this.connected;
+
+            if (!this.connected)
+            {
+                Save.IsEnabled = false;
+            }
         }
 
         private void DisconnectClick(object sender, RoutedEventArgs e)
@@ -157,6 +161,11 @@
 
         private void LoadData()
         {
+            if (this.dataLoaded)
+            {
+                // Refresh?
+            }
+
             this.items = new List<Item>();
 
             uint end = ItemEnd;
@@ -193,6 +202,10 @@
             this.LoadTab(this.KeyItems, new[] { 9 });
 
             CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString();
+
+            this.Save.IsEnabled = true;
+
+            this.dataLoaded = true;
         }
 
         private void DebugData()
@@ -218,7 +231,7 @@
             }
         }
 
-        private void RefreshClick(object sender, RoutedEventArgs e)
+        private void LoadClick(object sender, RoutedEventArgs e)
         {
             this.LoadData();
         }
