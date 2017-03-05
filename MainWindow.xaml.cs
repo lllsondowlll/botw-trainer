@@ -229,6 +229,21 @@
 
                 DebugLog.Document.Blocks.Add(paragraph);
             }
+
+            var stamina1 = this.tcpGecko.peek(0x42439594).ToString("X");
+            var stamina2 = this.tcpGecko.peek(0x42439598).ToString("X");
+            this.StaminaData.Content = string.Format("[0x42439594 = {0}, 0x42439598 = {1}]", stamina1, stamina2);
+
+            var health = this.tcpGecko.peek(0x439B6558);
+            this.HealthData.Content = string.Format("0x439B6558 = {0}", health);
+
+            var run = this.tcpGecko.peek(0x43A88CC4).ToString("X");
+            this.RunData.Content = string.Format("0x43A88CC4 = {0}", run);
+
+            var rupee1 = this.tcpGecko.peek(0x3FC92D10);
+            var rupee2 = this.tcpGecko.peek(0x4010AA0C);
+            var rupee3 = this.tcpGecko.peek(0x40E57E78);
+            this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}, 0x40E57E78 = {2}]", rupee1, rupee2, rupee3);
         }
 
         private void LoadClick(object sender, RoutedEventArgs e)
