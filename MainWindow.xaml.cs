@@ -235,10 +235,10 @@
             this.StaminaData.Content = string.Format("[0x42439594 = {0}, 0x42439598 = {1}]", stamina1, stamina2);
 
             var health = this.tcpGecko.peek(0x439B6558);
-            this.HealthData.Content = string.Format("0x439B6558 = {0}", health);
+            this.HealthData.Content = string.Format("Wrong address - 0x439B6558 = {0}", health);
 
             var run = this.tcpGecko.peek(0x43A88CC4).ToString("X");
-            this.RunData.Content = string.Format("0x43A88CC4 = {0}", run);
+            this.RunData.Content = string.Format("Wrong address - 0x43A88CC4 = {0}", run);
 
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
@@ -362,6 +362,8 @@
             Code List End Address = 01134300
             Code Handler Enabled Address = 10014CFC
             */
+
+            this.tcpGecko.poke32(0x10014CFC, 0x00000000);
 
             uint start = 0x01133000;
             uint end = 01134300;

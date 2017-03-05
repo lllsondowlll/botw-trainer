@@ -52,11 +52,11 @@
 
 
                     <Label Content="Health" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="84"/>
-                    <CheckBox x:Name="Health" Margin="0" Canvas.Left="130" Canvas.Top="90"/>
+                    <CheckBox x:Name="Health" Margin="0" Canvas.Left="130" Canvas.Top="90" IsEnabled="False"/>
                     <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="84"/>
 
                     <Label Content="Run" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="114"></Label>
-                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="120" />
+                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="120" IsEnabled="False" />
                     <Label x:Name="RunData" Content="RunData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="114"/>
 
                     <Label Content="Rupees" Height="25" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="144"></Label>
