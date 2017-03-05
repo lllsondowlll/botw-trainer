@@ -6,7 +6,6 @@
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Documents;
     using System.Windows.Input;
 
     using BotwTrainer.Properties;
@@ -24,9 +23,9 @@
 
         private TCPGecko tcpGecko;
 
-        private bool connected = false;
+        private bool connected;
 
-        private bool dataLoaded = false;
+        private bool dataLoaded;
 
         private List<Item> items;
 
@@ -127,14 +126,19 @@
                                                Margin = new Thickness(15, 20, 5, 30)
                                            });
 
+                    var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
+
                     var tb = new TextBox
                                  {
                                      Text = value.ToString(),
                                      Width = 60,
                                      Height = 22,
                                      Margin = new Thickness(0, 20, 10, 30),
-                                     Name = "Item_" + item.AddressHex
+                                     Name = "Item_" + item.AddressHex,
+                                     IsEnabled = !isArmour
                                  };
+
+                    tb.PreviewTextInput += this.NumberValidationTextBox;
 
                     var check = (TextBox)this.FindName("Item_" + item.AddressHex);
                     if (check != null)
@@ -213,31 +217,9 @@
 
         private void DebugData()
         {
-            //DebugLog.Document.Blocks.Clear();
-
-            //DebugLog.Document.Blocks.Add(new Paragraph(new Run("Total items: " + this.items.Count)));
-
-            foreach (var item in this.items.OrderByDescending(x => x.Address))
-            {
-                var paragraph = new Paragraph
-                {
-                    Margin = new Thickness(0),
-                    Padding = new Thickness(0)
-                };
-
-                paragraph.Inlines.Add("Address: " + item.Address.ToString("x").ToUpper());
-                paragraph.Inlines.Add(" | Page: " + item.Page);
-                paragraph.Inlines.Add(" | ?: " + item.Unknown);
-                paragraph.Inlines.Add(" | Value: " + item.Value);
-                paragraph.Inlines.Add(" | Equipped: " + item.Equipped.ToString("X"));
-                paragraph.Inlines.Add(" | Mod Amt.: " + item.ModAmount.ToString("X"));
-                paragraph.Inlines.Add(" | Mod Type: " + item.ModType.ToString("X"));
-
-                //DebugLog.Document.Blocks.Add(paragraph);
-            }
-
             DebugGrid.ItemsSource = this.items;
-            
+
+            DebugIntro.Content = string.Format("Showing {0} items", this.items.Count);
 
             var stamina1 = this.tcpGecko.peek(0x42439594).ToString("X");
             var stamina2 = this.tcpGecko.peek(0x42439598).ToString("X");
@@ -247,7 +229,7 @@
             this.HealthData.Content = string.Format("0x439B6558 = {0}", health);
 
             var run = this.tcpGecko.peek(0x43A88CC4).ToString("X");
-            this.RunData.Content = string.Format("Wrong address - 0x43A88CC4 = {0}", run);
+            this.RunData.Content = string.Format("0x43A88CC4 = {0}", run);
 
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
@@ -447,7 +429,7 @@
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
+            var regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
     }

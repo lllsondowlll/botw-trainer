@@ -1,5 +1,9 @@
 ﻿namespace BotwTrainer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class Item
     {
         public uint Address { get; set; }
@@ -28,7 +32,8 @@
         {
             get
             {
-                return this.Equipped.ToString("X");
+                var a = BitConverter.GetBytes(this.Equipped);
+                return a.Reverse().First().ToString("X");
             }
         }
 
