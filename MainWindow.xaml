@@ -48,21 +48,25 @@
 
                     <Label Content="Stamina" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="54"/>
                     <CheckBox x:Name="Stamina" Margin="0" Canvas.Left="130" Canvas.Top="60"/>
-                    <Label x:Name="StaminaData" Content="StaminaData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="54"/>
-
+                    <TextBox x:Name="CurrentStamina" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="54" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label x:Name="StaminaData" Content="StaminaData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="54"/>
 
                     <Label Content="Health" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="84"/>
                     <CheckBox x:Name="Health" Margin="0" Canvas.Left="130" Canvas.Top="90" />
-                    <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="84"/>
+                    <TextBox x:Name="CurrentHealth" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="84" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="84"/>
 
-                    <Label Content="Run" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="114"></Label>
-                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="120" />
-                    <Label x:Name="RunData" Content="RunData" Height="25" Margin="0" Canvas.Left="160" Canvas.Top="114"/>
+                    <Label Content="Run" Height="23" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="144"></Label>
+                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="130" Canvas.Top="150" />
+                    <Label x:Name="RunData" Content="RunData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="114" Visibility="Hidden"/>
 
-                    <Label Content="Rupees" Height="25" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="144"></Label>
-                    <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="130" Canvas.Top="150" />
-                    <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="145" PreviewTextInput="NumberValidationTextBox"></TextBox>
-                    <Label x:Name="RupeeData" Content="RupeeData" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="185"/>
+                    <Label Content="Rupees" Height="25" Width="60" Margin="0" Canvas.Left="50" Canvas.Top="114"></Label>
+                    <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="130" Canvas.Top="120" />
+                    <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="115" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label x:Name="RupeeData" Content="RupeeData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="115"/>
+                    
+                    
+                    <RadioButton ></RadioButton>
                 </Canvas>
             </TabItem>
 

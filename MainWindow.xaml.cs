@@ -35,6 +35,8 @@
 
         private readonly List<Item> items;
 
+        private bool itemOrderDescending = false;
+
         private TCPGecko tcpGecko;
 
         private bool connected;
@@ -122,6 +124,8 @@
                 this.LoadTab(this.Food, new[] { 8 });
                 this.LoadTab(this.KeyItems, new[] { 9 });
 
+                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString(CultureInfo.InvariantCulture);
+                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
 
                 this.Save.IsEnabled = true;
@@ -141,7 +145,13 @@
 
             foreach (var page in pages)
             {
-                var list = this.items.Where(i => i.Page == page).OrderByDescending(i => i.Address).ToList();
+                var thisPage = page;
+                var list = this.items.Where(i => i.Page == thisPage).OrderBy(i => i.Address);
+
+                if (this.itemOrderDescending)
+                {
+                    list = list.OrderByDescending(i => i.Address);
+                }
 
                 foreach (var item in list)
                 {
@@ -437,22 +447,26 @@
             // TODO: These are all 32 bit writes so move first and last line of each to loop at the end to avoid duplicating them
             if (cheats.Contains(Cheat.Stamina))
             {
+                var value = Convert.ToUInt32(CurrentStamina.Text);
+
                 codes.Add(0x00020000);
                 codes.Add(0x42439594);
-                codes.Add(0x453B8000);
+                codes.Add(value);
                 codes.Add(0x00000000);
 
                 codes.Add(0x00020000);
                 codes.Add(0x42439598);
-                codes.Add(0x453B8000);
+                codes.Add(value);
                 codes.Add(0x00000000);
             }
 
             if (cheats.Contains(Cheat.Health))
             {
+                var value = Convert.ToUInt32(CurrentHealth.Text);
+
                 codes.Add(0x00020000);
                 codes.Add(0x439B6558);
-                codes.Add(0x00000078);
+                codes.Add(value);
                 codes.Add(0x00000000);
             }
 

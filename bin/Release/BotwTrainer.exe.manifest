@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotwTrainer.exe" size="43968">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotwTrainer.exe" size="44480">
       <assemblyIdentity name="BotwTrainer" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>2twB5puDV71udF23bCYtbTsS8QXFm+6eFXZN+AdrLWM=</dsig:DigestValue>
+        <dsig:DigestValue>3P2Q02+CPKS+f/ztCX99au7UE1nl1xdjMMYBkrVldfQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
