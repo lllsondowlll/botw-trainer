@@ -98,12 +98,14 @@
         {
             ((Button)sender).IsEnabled = false;
 
+            items.Clear();
+
             var result = await Task.Run(() => this.LoadDataAsync());
 
             if (result)
             {
-                this.Load.Visibility = Visibility.Hidden;
-                this.Refresh.Visibility = Visibility.Visible;
+                //this.Load.Visibility = Visibility.Hidden;
+                //this.Refresh.Visibility = Visibility.Visible;
 
                 this.DebugData();
 
@@ -119,7 +121,10 @@
 
                 this.Save.IsEnabled = true;
 
-                MessageBox.Show("Data Loaded");
+                ((Button)sender).Content = "Refresh";
+                ((Button)sender).IsEnabled = true;
+
+                MessageBox.Show("Data transfer complete");
             }
         }
 
@@ -262,7 +267,13 @@
             }
             catch (Exception ex)
             {
-                Dispatcher.Invoke(() => { Continue.Content = ex.Message; });
+                Dispatcher.Invoke(
+                    () =>
+                        {
+                            Continue.Content = ex.Message;
+                            this.connected = false;
+                            this.ToggleControls();
+                        });
                 return false;
             }
         }
