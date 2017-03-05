@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Net.Sockets;
+    using System.Windows;
 
     public class TcpConn
     {
@@ -29,7 +30,7 @@
             }
             catch (Exception ex)
             {
-                //   
+                MessageBox.Show(ex.Message);
             }
 
             this.client = new TcpClient { NoDelay = true };
@@ -68,7 +69,7 @@
             }
             catch (Exception ex)
             {
-                //
+                MessageBox.Show(ex.Message);
             }
             finally
             {

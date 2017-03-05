@@ -363,7 +363,9 @@ namespace BotwTrainer
         public bool Connect()
         {
             if (this.PConnected)
+            {
                 this.Disconnect();
+            }
 
             this.PConnected = false;
 
@@ -371,9 +373,6 @@ namespace BotwTrainer
             try
             {
                 this.ptcp.Connect();
-                /*Byte[] init = new Byte[1];
-                if (GeckoRead(init, 1) != FTDICommand.CMD_OK || init[0] != 1)
-                    throw new IOException("init byte missing");*/
             }
             catch (IOException)
             {
@@ -382,15 +381,10 @@ namespace BotwTrainer
                 throw new ETCPGeckoException(ETCPErrorCode.noTCPGeckoFound);
             }
 
-            //Initialise TCP Gecko
-            if (this.InitGecko())
-            {
-                System.Threading.Thread.Sleep(150);
-                this.PConnected = true;
-                return true;
-            }
+            System.Threading.Thread.Sleep(150);
+            this.PConnected = true;
 
-            return false;
+            return true;
         }
 
         public bool Disconnect()

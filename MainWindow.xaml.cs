@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
@@ -14,7 +15,7 @@
     /// <summary>
     /// Interaction logic for MainWindow
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         // The original list of values that take effect when you save / load
         private const uint SaveItemStart = 0x3FCE7FF0;
@@ -29,6 +30,8 @@
         private const uint CodeHandlerStart = 0x01133000;
 
         private const uint CodeHandlerEnd = 0x01134300;
+
+        private const uint CodeHandlerEnabled = 0x10014CFC;
 
         private readonly List<Item> items;
 
@@ -73,10 +76,14 @@
             catch (ETCPGeckoException ex)
             {
                 MessageBox.Show(ex.Message);
+
+                this.connected = false;
             }
             catch (System.Net.Sockets.SocketException)
             {
                 MessageBox.Show("Wrong IP");
+
+                this.connected = false;
             }
         }
 
@@ -97,16 +104,14 @@
         private async void LoadClick(object sender, RoutedEventArgs e)
         {
             ((Button)sender).IsEnabled = false;
+            this.Save.IsEnabled = false;
 
-            items.Clear();
+            this.items.Clear();
 
             var result = await Task.Run(() => this.LoadDataAsync());
 
             if (result)
             {
-                //this.Load.Visibility = Visibility.Hidden;
-                //this.Refresh.Visibility = Visibility.Visible;
-
                 this.DebugData();
 
                 this.LoadTab(this.Weapons, new[] { 0 });
@@ -117,7 +122,7 @@
                 this.LoadTab(this.Food, new[] { 8 });
                 this.LoadTab(this.KeyItems, new[] { 9 });
 
-                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString();
+                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
 
                 this.Save.IsEnabled = true;
 
@@ -128,36 +133,7 @@
             }
         }
 
-        private async void RefreshClick(object sender, RoutedEventArgs e)
-        {
-            Progress.Value = 0;
-            Save.IsEnabled = false;
-
-            var result = await Task.Run(() => this.LoadDataAsync());
-
-            if (result)
-            {
-                foreach (var item in this.items)
-                {
-                    var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
-                    if (foundTextBox != null)
-                    {
-                        var value = item.Value;
-                        if (value > int.MaxValue)
-                        {
-                            value = 0;
-                        }
-
-                        foundTextBox.Text = value.ToString();
-                    }
-                }
-
-                MessageBox.Show("Data Refreshed");
-                Save.IsEnabled = true;
-            }
-        }
-
-        private void LoadTab(TabItem tab, IEnumerable<int> pages, bool clear = false)
+        private void LoadTab(TabItem tab, IEnumerable<int> pages)
         {
             var panel = new WrapPanel { Name = "PanelContent" };
 
@@ -188,7 +164,7 @@
 
                     var tb = new TextBox
                                  {
-                                     Text = value.ToString(),
+                                     Text = value.ToString(CultureInfo.InvariantCulture),
                                      Width = 60,
                                      Height = 22,
                                      Margin = new Thickness(0, 20, 10, 30),
@@ -280,7 +256,6 @@
 
         private void UpdateProgress(int percent)
         {
-
             Progress.Value = percent;
         }
 
@@ -376,7 +351,7 @@
                     }
                 }
 
-                MessageBox.Show("Data sent. Please save/load the game");
+                MessageBox.Show("Data sent. Please save/load the game.");
             }
 
             // Here we can poke the values we see in Debug as it has and imemdiate effect
@@ -446,14 +421,8 @@
 
         private void SetCheats(List<Cheat> cheats)
         {
-            /*
-            Code List Starting Address = 01133000
-            Code List End Address = 01134300
-            Code Handler Enabled Address = 10014CFC
-            */
-
             // Disable codehandler before we modify
-            this.tcpGecko.poke32(0x10014CFC, 0x00000000);
+            this.tcpGecko.poke32(CodeHandlerEnabled, 0x00000000);
 
             // clear current codes
             var clear = CodeHandlerStart;
@@ -465,7 +434,7 @@
 
             var codes = new List<uint>();
 
-            // TODO: These are all 32 bit writes so move first and list line of each to loop at the end to avoid duplicating them
+            // TODO: These are all 32 bit writes so move first and last line of each to loop at the end to avoid duplicating them
             if (cheats.Contains(Cheat.Stamina))
             {
                 codes.Add(0x00020000);
@@ -497,7 +466,7 @@
 
             if (cheats.Contains(Cheat.Rupees))
             {
-                uint value = Convert.ToUInt32(CurrentRupees.Text);
+                var value = Convert.ToUInt32(CurrentRupees.Text);
 
                 codes.Add(0x00020000);
                 codes.Add(0x3FC92D10);
@@ -524,7 +493,7 @@
             }
 
             // Re-enable codehandler
-            this.tcpGecko.poke32(0x10014CFC, 0x00000001);
+            this.tcpGecko.poke32(CodeHandlerEnabled, 0x00000001);
         }
 
         private void ToggleControls()

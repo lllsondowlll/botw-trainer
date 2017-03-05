@@ -15,9 +15,9 @@
         </Grid.RowDefinitions>
 
         <Canvas Grid.Row="0" Margin="0">
-            <TextBox x:Name="IpAddress" HorizontalAlignment="Left" Height="21" Margin="30,15,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100"/>
-            <Button x:Name="Connect" Content="Connect" HorizontalAlignment="Left" Margin="155,15,0,0" VerticalAlignment="Top" Width="75" Click="ConnectClick" />
-            <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="255,15,0,0" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False"/>
+            <TextBox x:Name="IpAddress" HorizontalAlignment="Left" Height="21" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100" Canvas.Left="14" Canvas.Top="13"/>
+            <Button x:Name="Connect" Content="Connect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="ConnectClick" Canvas.Left="148" Canvas.Top="13" />
+            <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False" Canvas.Left="255" Canvas.Top="13"/>
         </Canvas>
 
         <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="420" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
@@ -68,9 +68,9 @@
 
             <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0">
                 <WrapPanel Margin="0">
-                
+
                     <Label x:Name="DebugIntro" Content="test" Margin="0,0,0,0" Height="30" Width="400"></Label>
-                    
+
                     <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Address" Width="100" Binding="{Binding AddressHex}"></DataGridTextColumn>
@@ -89,11 +89,9 @@
         </TabControl>
 
         <Canvas Grid.Row="2" Margin="0">
-            <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="10" Canvas.Top="10" IsEnabled="False" />
+            <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="4" Canvas.Top="8" IsEnabled="False" />
 
-            <Button x:Name="Refresh" Content="Refresh" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="RefreshClick" Canvas.Left="10" Canvas.Top="10" Visibility="Hidden" />
-
-            <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="SaveClick" Canvas.Left="109" Canvas.Top="10" IsEnabled="False" />
+            <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="SaveClick" Canvas.Left="109" Canvas.Top="8" IsEnabled="False" />
         </Canvas>
 
         <ProgressBar Height="15" Name="Progress" Grid.Row="3" Foreground="#FF138127" />
