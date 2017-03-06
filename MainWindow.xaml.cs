@@ -11,6 +11,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
+    using System.Windows.Media;
 
     using BotwTrainer.Properties;
 
@@ -37,7 +38,7 @@
 
         private readonly List<Item> items;
 
-        private bool itemOrderDescending = false;
+        private bool itemOrderDescending = true;
 
         private TCPGecko tcpGecko;
 
@@ -78,7 +79,6 @@
                     Settings.Default.Save();
 
                     this.ToggleControls();
-                    this.Continue.Visibility = Visibility.Visible;
                 }
             }
             catch (ETCPGeckoException ex)
@@ -149,7 +149,39 @@
 
         private void LoadTab(TabItem tab, IEnumerable<int> pages)
         {
-            var panel = new WrapPanel { Name = "PanelContent", Margin = new Thickness(10) };
+            var scroll = new ScrollViewer { Name = "ScrollContent", Margin = new Thickness(10), VerticalAlignment = VerticalAlignment.Top};
+
+            var grid = new Grid { Name = "PanelContent", Margin = new Thickness(0), ShowGridLines = false, VerticalAlignment = VerticalAlignment.Top};
+            
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            grid.RowDefinitions.Add(new RowDefinition());
+
+            var itemHeader = new TextBlock
+            {
+                Text = "Item Name",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold
+            };
+            Grid.SetRow(itemHeader, 0);
+            Grid.SetColumn(itemHeader, 0);
+            grid.Children.Add(itemHeader);
+
+            var valueHeader = new TextBlock
+            {
+                Text = "Item Value",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            Grid.SetRow(valueHeader, 0);
+            Grid.SetColumn(valueHeader, 1);
+            grid.Children.Add(valueHeader);
+
+            var x = 1;
 
             foreach (var page in pages)
             {
@@ -163,30 +195,34 @@
 
                 foreach (var item in list)
                 {
+                    grid.RowDefinitions.Add(new RowDefinition());
+
                     var value = item.Value;
                     if (value > int.MaxValue)
                     {
                         value = 0;
                     }
 
-                    panel.Children.Add(new Label
-                                           {
-                                               Content = item.Name, 
-                                               ToolTip = item.Address.ToString("X"), 
-                                               Margin = new Thickness(0, 0, 10, 30)
-                                           });
+                    var lb = new Label
+                    {
+                        Content = item.Name, 
+                        ToolTip = item.Address.ToString("X"), 
+                        Margin = new Thickness(0),
+                        Height = 30
+                    };
 
-                    //var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
+                    Grid.SetRow(lb, x);
+                    Grid.SetColumn(lb, 0);
 
                     var tb = new TextBox
-                                 {
-                                     Text = value.ToString(CultureInfo.InvariantCulture), 
-                                     Width = 60, 
-                                     Height = 20, 
-                                     Margin = new Thickness(0, 4, 35, 30), 
-                                     Name = "Item_" + item.AddressHex, 
-                                     IsEnabled = true
-                                 };
+                    {
+                        Text = value.ToString(CultureInfo.InvariantCulture), 
+                        Width = 70, 
+                        Height = 26, 
+                        Margin = new Thickness(0), 
+                        Name = "Item_" + item.AddressHex, 
+                        IsEnabled = true
+                    };
 
                     tb.PreviewTextInput += this.NumberValidationTextBox;
 
@@ -198,17 +234,27 @@
 
                     this.RegisterName("Item_" + item.AddressHex, tb);
 
-                    panel.Children.Add(tb);
+                    Grid.SetRow(tb, x);
+                    Grid.SetColumn(tb, 1);
+
+                    grid.Children.Add(lb);
+                    grid.Children.Add(tb);
+
+                    x++;
                 }
             }
 
+            grid.Height = x * 34;
+
+            scroll.Content = grid;
+
             if (tab.Name == "Materials")
             {
-                MaterialsContent.Content = panel;
+                MaterialsContent.Content = scroll;
                 return;
             }
 
-            tab.Content = panel;
+            tab.Content = scroll;
         }
 
         private bool LoadDataAsync()
@@ -220,7 +266,7 @@
             dump.Position = 0;
             */
 
-            Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
+            //Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
 
             try
             {
@@ -235,7 +281,12 @@
                     var page = this.tcpGecko.peek(end);
                     if (page > 9)
                     {
-                        Dispatcher.Invoke(() => { Continue.Content = string.Format("Skipping...Items found: {0}", itemsFound); });
+                        Dispatcher.Invoke(
+                            () =>
+                                {
+                                    //Continue.Content = string.Format("Skipping...Items found: {0}", itemsFound);
+                                    ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                                });
 
                         var currentPercent1 = (100m / 418m) * x;
                         Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent1)));
@@ -261,7 +312,12 @@
 
                     this.items.Add(item);
 
-                    Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", itemsFound); });
+                    Dispatcher.Invoke(
+                        () =>
+                            {
+                                //Continue.Content = string.Format("Loading...Items found: {0}", itemsFound);
+                                ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                            });
 
                     var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
@@ -278,7 +334,7 @@
                 Dispatcher.Invoke(
                     () =>
                         {
-                            Continue.Content = ex.Message;
+                            //Continue.Content = ex.Message;
                             this.connected = false;
                             this.ToggleControls();
                         });
@@ -358,6 +414,11 @@
         {
             // Grab the values from the relevant tab and  poke them back to memory
             var tab = (TabItem)TabControl.SelectedItem;
+
+            if (Equals(tab, this.Debug))
+            {
+                MessageBox.Show("Can't save this data (yet)");
+            }
 
             // For these we amend the 0x3FCE7FF0 area which requires save/load
             if (Equals(tab, this.Weapons) || Equals(tab, this.BowsArrows) || Equals(tab, this.Shields))
