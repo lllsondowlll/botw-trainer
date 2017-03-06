@@ -451,11 +451,6 @@ namespace BotwTrainer
 
         public void Dump(Dump dump)
         {
-            //Stream[] tempStream = { dump.dumpStream, dump.getOutputStream() };
-            //Stream[] tempStream = { dump.dumpStream };
-            //Dump(dump.startAddress, dump.endAddress, tempStream);
-            //dump.getOutputStream().Dispose();
-            //dump.WriteStreamToDisk();
             this.Dump(dump.StartAddress, dump.EndAddress, dump);
         }
 

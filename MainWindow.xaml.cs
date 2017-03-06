@@ -57,7 +57,11 @@
             Stamina = 0,
             Health = 1,
             Run = 2,
-            Rupees = 3
+            Rupees = 3,
+            MoonJump = 4,
+            WeaponInv = 5,
+            BowInv = 6,
+            ShieldInv = 7
         }
 
         private void ConnectClick(object sender, RoutedEventArgs e)
@@ -129,6 +133,10 @@
                 CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
                 CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
+
+                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
+                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
+                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
 
                 this.Save.IsEnabled = true;
 
@@ -212,6 +220,11 @@
         private bool LoadDataAsync()
         {
             // TODO: Dump the entire item block instead of peeking
+            /*
+            var dump = new MemoryStream();
+            this.tcpGecko.Dump(ItemStart, ItemEnd, dump);
+            dump.Position = 0;
+            */
 
             Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
 
@@ -283,18 +296,24 @@
 
             var builder = new StringBuilder();
 
+            long endName = 0;
+
             for (var i = 0; i < dump.Length; i++)
             {
                 var data = dump.ReadByte();
                 if (data == 0)
                 {
+                    endName = dump.Position;
                     break;
                 }
 
                 builder.Append((char)data);
             }
 
-            return builder.ToString().Replace("_", " ");
+            var test = endName;
+            var name = builder.ToString().Replace("_", " ");
+
+            return name;
         }
 
         private void DebugData()
@@ -318,6 +337,18 @@
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
             this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}]", rupee1, rupee2);
+
+            var weapon1 = this.tcpGecko.peek(0x3FCFB498);
+            var weapon2 = this.tcpGecko.peek(0x4010B34C);
+            this.WeaponSlotsData.Content = string.Format("[0x3FCFB498 = {0}, 0x4010B34C = {1}]", weapon1, weapon2);
+
+            var bow1 = this.tcpGecko.peek(0x3FD4BB50);
+            var bow2 = this.tcpGecko.peek(0x4011126C);
+            this.BowSlotsData.Content = string.Format("[0x3FD4BB50 = {0}, 0x4011126C = {1}]", bow1, bow2);
+
+            var shield1 = this.tcpGecko.peek(0x3FCC0B40);
+            var shield2 = this.tcpGecko.peek(0x4011128C);
+            this.ShieldSlotsData.Content = string.Format("[0x3FCC0B40 = {0}, 0x4011128C = {1}]", shield1, shield2);
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -391,7 +422,7 @@
                 MessageBox.Show("Data sent. Please save/load the game.");
             }
 
-            // Here we can poke the values we see in Debug as it has and imemdiate effect
+            // Here we can poke the values we see in Debug as it has and immediate effect
             if (Equals(tab, this.BowsArrows) || Equals(tab, this.Materials) || Equals(tab, this.Food) || Equals(tab, this.KeyItems))
             {
                 var page = 0;
@@ -442,14 +473,34 @@
                     selected.Add(Cheat.Health);
                 }
 
+                if (Rupees.IsChecked == true)
+                {
+                    selected.Add(Cheat.Rupees);
+                }
+
                 if (Run.IsChecked == true)
                 {
                     selected.Add(Cheat.Run);
                 }
 
-                if (Rupees.IsChecked == true)
+                if (MoonJump.IsChecked == true)
                 {
-                    selected.Add(Cheat.Rupees);
+                    selected.Add(Cheat.MoonJump);
+                }
+
+                if (WeaponSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.WeaponInv);
+                }
+
+                if (BowSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.BowInv);
+                }
+
+                if (ShieldSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.ShieldInv);
                 }
 
                 this.SetCheats(selected);
@@ -471,10 +522,12 @@
 
             var codes = new List<uint>();
 
-            // TODO: These are all 32 bit writes so move first and last line of each to loop at the end to avoid duplicating them
+            // TODO: Consider moving first and last line of each to loop at the end to avoid duplicating them
+            // Most are 32 bit writes
             if (cheats.Contains(Cheat.Stamina))
             {
-                var value = Convert.ToUInt32(CurrentStamina.Text);
+                // Max 453B8000
+                var value = uint.Parse(CurrentStamina.Text, NumberStyles.HexNumber);
 
                 codes.Add(0x00020000);
                 codes.Add(0x42439594);
@@ -518,13 +571,76 @@
                 codes.Add(0x4010AA0C);
                 codes.Add(value);
                 codes.Add(0x00000000);
+            }
 
-                /*
+            if (cheats.Contains(Cheat.MoonJump))
+            {
+                codes.Add(0x03020000);
+                codes.Add(0x102F48A8);
+                codes.Add(0x00002000);
+                codes.Add(0x00000000);
                 codes.Add(0x00020000);
-                codes.Add(0x40E57E78);
+                codes.Add(0x439BF528);
+                codes.Add(0xBF400000);
+                codes.Add(0x00000000);
+                codes.Add(0xD0000000);
+                codes.Add(0xDEADCAFE);
+
+                codes.Add(0x04020000);
+                codes.Add(0x102F48A8);
+                codes.Add(0x00002000);
+                codes.Add(0x00000000);
+                codes.Add(0x00020000);
+                codes.Add(0x439BF528);
+                codes.Add(0x3F800000);
+                codes.Add(0x00000000);
+                codes.Add(0xD0000000);
+                codes.Add(0xDEADCAFE);
+            }
+
+            if (cheats.Contains(Cheat.WeaponInv))
+            {
+                var value = Convert.ToUInt32(CurrentWeaponSlots.Text);
+
+                codes.Add(0x00020000);
+                codes.Add(0x3FCFB498);
                 codes.Add(value);
                 codes.Add(0x00000000);
-                 * */
+
+                codes.Add(0x00020000);
+                codes.Add(0x4010B34C);
+                codes.Add(value);
+                codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.BowInv))
+            {
+                var value = Convert.ToUInt32(CurrentBowSlots.Text);
+
+                codes.Add(0x00020000);
+                codes.Add(0x3FD4BB50);
+                codes.Add(value);
+                codes.Add(0x00000000);
+
+                codes.Add(0x00020000);
+                codes.Add(0x4011126C);
+                codes.Add(value);
+                codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.ShieldInv))
+            {
+                var value = Convert.ToUInt32(CurrentShieldSlots.Text);
+
+                codes.Add(0x00020000);
+                codes.Add(0x3FCC0B40);
+                codes.Add(value);
+                codes.Add(0x00000000);
+
+                codes.Add(0x00020000);
+                codes.Add(0x4011128C);
+                codes.Add(value);
+                codes.Add(0x00000000);
             }
 
             // Write our selected codes
