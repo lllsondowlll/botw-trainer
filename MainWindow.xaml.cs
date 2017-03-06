@@ -149,9 +149,7 @@
 
         private void LoadTab(TabItem tab, IEnumerable<int> pages)
         {
-            var panel = new WrapPanel { Name = "PanelContent" };
-
-            var x = 1;
+            var panel = new WrapPanel { Name = "PanelContent", Margin = new Thickness(10) };
 
             foreach (var page in pages)
             {
@@ -165,7 +163,6 @@
 
                 foreach (var item in list)
                 {
-                    var label = string.Format("Item {0}:", x);
                     var value = item.Value;
                     if (value > int.MaxValue)
                     {
@@ -174,21 +171,20 @@
 
                     panel.Children.Add(new Label
                                            {
-                                               Content = label,
-                                               ToolTip = item.Address.ToString("X"),
-                                               Width = 55,
-                                               Margin = new Thickness(15, 20, 5, 30)
+                                               Content = item.Name, 
+                                               ToolTip = item.Address.ToString("X"), 
+                                               Margin = new Thickness(0, 0, 10, 30)
                                            });
 
                     var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
 
                     var tb = new TextBox
                                  {
-                                     Text = value.ToString(CultureInfo.InvariantCulture),
-                                     Width = 60,
-                                     Height = 22,
-                                     Margin = new Thickness(0, 20, 10, 30),
-                                     Name = "Item_" + item.AddressHex,
+                                     Text = value.ToString(CultureInfo.InvariantCulture), 
+                                     Width = 60, 
+                                     Height = 20, 
+                                     Margin = new Thickness(0, 4, 35, 30), 
+                                     Name = "Item_" + item.AddressHex, 
                                      IsEnabled = !isArmour
                                  };
 
@@ -203,8 +199,6 @@
                     this.RegisterName("Item_" + item.AddressHex, tb);
 
                     panel.Children.Add(tb);
-
-                    x++;
                 }
             }
 
