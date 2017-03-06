@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d"
-        Title="BOTW Trainer" Height="600" Width="800" ResizeMode="NoResize">
+        Title="BOTW Trainer" Height="700" Width="800" ResizeMode="NoResize">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -20,7 +20,7 @@
             <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False" Canvas.Left="255" Canvas.Top="13"/>
         </Canvas>
 
-        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="420" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
+        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
 
             <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0">
                 <StackPanel>
@@ -93,13 +93,13 @@
                     <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Width="100" Binding="{Binding Name}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Address" Width="100" Binding="{Binding AddressHex}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Address" Width="100" Binding="{Binding AddressHex, Mode=OneWay}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Page" Width="50" Binding="{Binding Page}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Unknown" Width="50" Binding="{Binding Unknown}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Value" Width="100" Binding="{Binding Value}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Equipped" Width="50" Binding="{Binding EquippedHex}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Mod Amount" Width="100" Binding="{Binding ModAmountHex}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Mod Type" Width="100" Binding="{Binding ModTypeHex}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Equipped" Width="50" Binding="{Binding EquippedHex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Mod Amount" Width="100" Binding="{Binding ModAmountHex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Mod Type" Width="100" Binding="{Binding ModTypeHex, Mode=OneWay}"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 

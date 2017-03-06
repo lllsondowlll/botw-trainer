@@ -176,7 +176,7 @@
                                                Margin = new Thickness(0, 0, 10, 30)
                                            });
 
-                    var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
+                    //var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
 
                     var tb = new TextBox
                                  {
@@ -185,7 +185,7 @@
                                      Height = 20, 
                                      Margin = new Thickness(0, 4, 35, 30), 
                                      Name = "Item_" + item.AddressHex, 
-                                     IsEnabled = !isArmour
+                                     IsEnabled = true
                                  };
 
                     tb.PreviewTextInput += this.NumberValidationTextBox;
@@ -225,6 +225,7 @@
             try
             {
                 var x = 0;
+                var itemsFound = 0;
 
                 var end = ItemEnd;
 
@@ -234,6 +235,8 @@
                     var page = this.tcpGecko.peek(end);
                     if (page > 9)
                     {
+                        Dispatcher.Invoke(() => { Continue.Content = string.Format("Skipping...Items found: {0}", itemsFound); });
+
                         var currentPercent1 = (100m / 418m) * x;
                         Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent1)));
 
@@ -257,14 +260,15 @@
                     };
 
                     this.items.Add(item);
-  
-                    Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", x); });
+
+                    Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", itemsFound); });
 
                     var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
 
                     end -= 0x220;
                     x++;
+                    itemsFound++;
                 }
 
                 return true;
