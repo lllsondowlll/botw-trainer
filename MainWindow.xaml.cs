@@ -27,7 +27,7 @@
 
         // 0x140 (320) is the amount of items to search for in memory. Over estimating at this point.
         // We start at the end and go back in jumps of 0x220 getting data 320 times
-        private const uint ItemStart = ItemEnd - (0x140 * 0x220);
+        private const uint ItemStart = 0x43C6B2AC; // ItemEnd - (0x140 * 0x220);
 
         private const uint CodeHandlerStart = 0x01133000;
 
@@ -230,12 +230,17 @@
 
                 while (end >= ItemStart)
                 {
-                    // If we start to hit FFFFFFFF then we break as its the end of the items
+                    // Skip FFFFFFFF invalild items
                     var page = this.tcpGecko.peek(end);
                     if (page > 9)
                     {
-                        Dispatcher.Invoke(() => this.UpdateProgress(100));
-                        break;
+                        var currentPercent1 = (100m / 418m) * x;
+                        Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent1)));
+
+                        end -= 0x220;
+                        x++;
+
+                        continue;
                     }
 
                     var item = new Item
@@ -252,10 +257,10 @@
                     };
 
                     this.items.Add(item);
-
+  
                     Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", x); });
 
-                    var currentPercent = (100m / 320m) * x;
+                    var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
 
                     end -= 0x220;
