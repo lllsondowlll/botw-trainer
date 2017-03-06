@@ -126,7 +126,7 @@
                 this.LoadTab(this.Food, new[] { 8 });
                 this.LoadTab(this.KeyItems, new[] { 9 });
 
-                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString(CultureInfo.InvariantCulture);
+                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
                 CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
 
@@ -211,6 +211,8 @@
 
         private bool LoadDataAsync()
         {
+            // TODO: Dump the entire item block instead of peeking
+
             Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
 
             try
@@ -315,8 +317,7 @@
 
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
-            var rupee3 = this.tcpGecko.peek(0x40E57E78);
-            this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}, 0x40E57E78 = {2}]", rupee1, rupee2, rupee3);
+            this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}]", rupee1, rupee2);
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -518,10 +519,12 @@
                 codes.Add(value);
                 codes.Add(0x00000000);
 
+                /*
                 codes.Add(0x00020000);
                 codes.Add(0x40E57E78);
                 codes.Add(value);
                 codes.Add(0x00000000);
+                 * */
             }
 
             // Write our selected codes
