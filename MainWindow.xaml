@@ -64,9 +64,6 @@
                     <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="130" Canvas.Top="120" />
                     <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="169" Canvas.Top="115" PreviewTextInput="NumberValidationTextBox"></TextBox>
                     <Label x:Name="RupeeData" Content="RupeeData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="115"/>
-                    
-                    
-                    <RadioButton ></RadioButton>
                 </Canvas>
             </TabItem>
 
@@ -77,11 +74,12 @@
 
                     <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0">
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Width="100" Binding="{Binding Name}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Address" Width="100" Binding="{Binding AddressHex}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Page" Width="100" Binding="{Binding Page}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Page" Width="50" Binding="{Binding Page}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Unknown" Width="100" Binding="{Binding Unknown}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Value" Width="100" Binding="{Binding Value}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Equipped" Width="100" Binding="{Binding EquippedHex}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Equipped" Width="50" Binding="{Binding EquippedHex}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Mod Amount" Width="100" Binding="{Binding ModAmountHex}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Mod Type" Width="100" Binding="{Binding ModTypeHex}"></DataGridTextColumn>
                         </DataGrid.Columns>

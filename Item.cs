@@ -5,6 +5,10 @@
 
     public class Item
     {
+        public uint NameStart { get; set; }
+
+        public string Name { get; set; }
+
         public uint Address { get; set; }
 
         public string AddressHex

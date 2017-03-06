@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows;
@@ -215,7 +217,7 @@
             {
                 var x = 0;
 
-                uint end = ItemEnd;
+                var end = ItemEnd;
 
                 while (end >= ItemStart)
                 {
@@ -234,6 +236,8 @@
                         Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
                         Value = this.tcpGecko.peek(end + 0x8),
                         Equipped = this.tcpGecko.peek(end + 0xC),
+                        NameStart = this.tcpGecko.peek(end + 0x1C),
+                        Name = this.ReadString(end + 0x1C),
                         ModAmount = this.tcpGecko.peek(end + 0x5C),
                         ModType = this.tcpGecko.peek(end + 0x64),
                     };
@@ -267,6 +271,28 @@
         private void UpdateProgress(int percent)
         {
             Progress.Value = percent;
+        }
+
+        private string ReadString(uint addr)
+        {
+            var dump = new MemoryStream();
+            this.tcpGecko.Dump(addr, addr + 0x24, dump);
+            dump.Position = 0;
+
+            var builder = new StringBuilder();
+
+            for (var i = 0; i < dump.Length; i++)
+            {
+                var data = dump.ReadByte();
+                if (data == 0)
+                {
+                    break;
+                }
+
+                builder.Append((char)data);
+            }
+
+            return builder.ToString().Replace("_", " ");
         }
 
         private void DebugData()
