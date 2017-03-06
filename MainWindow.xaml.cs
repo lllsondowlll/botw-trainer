@@ -5,13 +5,13 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
-    using System.Windows.Media;
 
     using BotwTrainer.Properties;
 
@@ -38,6 +38,10 @@
 
         private readonly List<Item> items;
 
+        private readonly WebClient client;
+
+        private readonly string version;
+
         private bool itemOrderDescending = true;
 
         private TCPGecko tcpGecko;
@@ -49,6 +53,13 @@
             this.InitializeComponent();
 
             IpAddress.Text = Settings.Default.IpAddress;
+            this.version = Settings.Default.CurrentVersion;
+
+            this.Title = string.Format("{0} v{1}", this.Title, this.version);
+
+            this.client = new WebClient { BaseAddress = Settings.Default.VersionUrl, Encoding = Encoding.UTF8 };
+            this.client.DownloadStringCompleted += this.ClientDownloadStringCompleted;
+            this.client.DownloadStringAsync(new Uri(string.Format("{0}{1}", this.client.BaseAddress, "version.txt")));
 
             this.items = new List<Item>();
         }
@@ -65,7 +76,24 @@
             ShieldInv = 7
         }
 
-        private void ConnectClick(object sender, RoutedEventArgs e)
+        private void ClientDownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                var result = e.Result;
+                if (result != this.version)
+                {
+                    MessageBox.Show("An update is available");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error checking for new version");
+            }
+        }
+
+        private
+            void ConnectClick(object sender, RoutedEventArgs e)
         {
             this.tcpGecko = new TCPGecko(this.IpAddress.Text, 7331);
 

@@ -20,7 +20,7 @@
             <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False" Canvas.Left="255" Canvas.Top="13"/>
         </Canvas>
 
-        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" Margin="0" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
+        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="760">
 
             <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0"/>
 
@@ -40,44 +40,45 @@
 
             <TabItem Header="Codes" x:Name="Other" Margin="0,0,0,0">
                 <Canvas>
-                    <Label Content="Current address/values printed to the right." Height="25" Margin="0" Canvas.Left="50" Canvas.Top="24"/>
+                    <Label Content="To enable these codes check the box and click save." Height="30" Margin="0" Canvas.Left="50" Canvas.Top="24" FontSize="14" Width="642"/>
+                    <Label Content="Current address/values printed to the right." Height="30" Margin="0" Canvas.Left="50" Canvas.Top="54"/>
 
-                    <Label Content="Stamina" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="54"/>
-                    <CheckBox x:Name="Stamina" Margin="0" Canvas.Left="160" Canvas.Top="60"/>
-                    <TextBox x:Name="CurrentStamina" Height="25" Width="90" Margin="0" Canvas.Left="200" Canvas.Top="54"></TextBox>
-                    <Label x:Name="StaminaData" Content="StaminaData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="54"/>
+                    <Label Content="Stamina" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="94"/>
+                    <CheckBox x:Name="Stamina" Margin="0" Canvas.Left="160" Canvas.Top="100"/>
+                    <TextBox x:Name="CurrentStamina" Height="25" Width="90" Margin="0" Canvas.Left="200" Canvas.Top="94"></TextBox>
+                    <Label x:Name="StaminaData" Content="StaminaData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="94"/>
 
-                    <Label Content="Health (Max 78)" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="84"/>
-                    <CheckBox x:Name="Health" Margin="0" Canvas.Left="160" Canvas.Top="90" />
-                    <TextBox x:Name="CurrentHealth" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="84" PreviewTextInput="NumberValidationTextBox"></TextBox>
-                    <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="84"/>
+                    <Label Content="Health (Max 78)" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="124"/>
+                    <CheckBox x:Name="Health" Margin="0" Canvas.Left="160" Canvas.Top="130" />
+                    <TextBox x:Name="CurrentHealth" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="124" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label x:Name="HealthData" Content="HealthData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="124"/>
 
-                    <Label Content="Rupees" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="114"></Label>
-                    <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="160" Canvas.Top="120" />
-                    <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="200" Canvas.Top="115" PreviewTextInput="NumberValidationTextBox"></TextBox>
-                    <Label x:Name="RupeeData" Content="RupeeData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="115"/>
+                    <Label Content="Rupees" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="154"></Label>
+                    <CheckBox x:Name="Rupees" Margin="0" Canvas.Left="160" Canvas.Top="160" />
+                    <TextBox x:Name="CurrentRupees" Height="25" Width="90" Margin="0" Canvas.Left="200" Canvas.Top="155" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label x:Name="RupeeData" Content="RupeeData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="155"/>
 
-                    <Label Content="Always Run" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="144"></Label>
-                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="160" Canvas.Top="150" />
+                    <Label Content="Always Run" Height="23" Margin="0" Canvas.Left="50" Canvas.Top="184"></Label>
+                    <CheckBox x:Name="Run" Margin="0" Canvas.Left="160" Canvas.Top="190" />
                     <Label x:Name="RunData" Content="RunData" Height="25" Margin="0" Canvas.Left="280" Canvas.Top="144" Visibility="Hidden"/>
 
-                    <Label Content="Moon Jump" Height="25" Canvas.Left="50" Canvas.Top="174"></Label>
-                    <CheckBox x:Name="MoonJump" Margin="0" Canvas.Left="160" Canvas.Top="180" />
+                    <Label Content="Moon Jump" Height="25" Canvas.Left="50" Canvas.Top="214"></Label>
+                    <CheckBox x:Name="MoonJump" Margin="0" Canvas.Left="160" Canvas.Top="220" />
 
-                    <Label Content="Weapon Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="204"></Label>
-                    <CheckBox x:Name="WeaponSlots" Margin="0" Canvas.Left="160" Canvas.Top="210" />
-                    <TextBox x:Name="CurrentWeaponSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="205" PreviewTextInput="NumberValidationTextBox"/>
-                    <Label x:Name="WeaponSlotsData" Content="WeaponSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="205"/>
+                    <Label Content="Weapon Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="244"></Label>
+                    <CheckBox x:Name="WeaponSlots" Margin="0" Canvas.Left="160" Canvas.Top="250" />
+                    <TextBox x:Name="CurrentWeaponSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="245" PreviewTextInput="NumberValidationTextBox"/>
+                    <Label x:Name="WeaponSlotsData" Content="WeaponSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="245"/>
 
-                    <Label Content="Bow Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="234"/>
-                    <CheckBox x:Name="BowSlots" Margin="0" Canvas.Left="160" Canvas.Top="240" />
-                    <TextBox x:Name="CurrentBowSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="235" PreviewTextInput="NumberValidationTextBox"/>
-                    <Label x:Name="BowSlotsData" Content="BowSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="235"/>
+                    <Label Content="Bow Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="274"/>
+                    <CheckBox x:Name="BowSlots" Margin="0" Canvas.Left="160" Canvas.Top="280" />
+                    <TextBox x:Name="CurrentBowSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="275" PreviewTextInput="NumberValidationTextBox"/>
+                    <Label x:Name="BowSlotsData" Content="BowSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="275"/>
 
-                    <Label Content="Shield Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="264"/>
-                    <CheckBox x:Name="ShieldSlots" Margin="0" Canvas.Left="160" Canvas.Top="270" />
-                    <TextBox x:Name="CurrentShieldSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="265" PreviewTextInput="NumberValidationTextBox"/>
-                    <Label x:Name="ShieldSlotsData" Content="ShieldSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="265"/>
+                    <Label Content="Shield Slots" Height="25" Margin="0" Canvas.Left="50" Canvas.Top="304"/>
+                    <CheckBox x:Name="ShieldSlots" Margin="0" Canvas.Left="160" Canvas.Top="310" />
+                    <TextBox x:Name="CurrentShieldSlots" Height="25" Width="30" Margin="0" Canvas.Left="200" Canvas.Top="305" PreviewTextInput="NumberValidationTextBox"/>
+                    <Label x:Name="ShieldSlotsData" Content="ShieldSlotsData" Height="25" Margin="0" Canvas.Left="315" Canvas.Top="305"/>
                 </Canvas>
             </TabItem>
 
