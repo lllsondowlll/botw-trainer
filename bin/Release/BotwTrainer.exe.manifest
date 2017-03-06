@@ -50,17 +50,17 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>sPb8ihb4nZPQFv3LpPlfokHM9/XiOuFNLpJ4BXIBtu4=</dsig:DigestValue>
+        <dsig:DigestValue>ZubTWQvMee49BG5wraK/bUWHzOLnb6Ij+ofDgpnRccA=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="BotwTrainer.exe.config" size="1121">
+  <file name="BotwTrainer.exe.config" size="1119">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>fNzxXli+thCTH7weAaiIepX/VifQ+xLlH5kn0o2FVCE=</dsig:DigestValue>
+      <dsig:DigestValue>bZnlSA8GQ5S8e4dY4H5NYgh1DHRZzTtVN1BLP4cB0RY=</dsig:DigestValue>
     </hash>
   </file>
   <file name="icon.ico" size="193310">

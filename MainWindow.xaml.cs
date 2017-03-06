@@ -83,7 +83,7 @@
                 var result = e.Result;
                 if (result != this.version)
                 {
-                    MessageBox.Show("An update is available");
+                    MessageBox.Show(string.Format("An update is available: {0}", result));
                 }
             }
             catch (Exception ex)
