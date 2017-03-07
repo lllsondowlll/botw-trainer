@@ -31,12 +31,20 @@
 
         public uint Equipped { get; set; }
 
-        public string EquippedHex
+        public bool EquippedBool
         {
             get
             {
-                var a = BitConverter.GetBytes(this.Equipped);
-                return a.Reverse().First().ToString("X");
+                try
+                {
+                    var val = BitConverter.GetBytes(this.Equipped).Reverse().First().ToString("X");
+                    return val != "0";
+                }
+                catch
+                {
+                    return false;
+                }
+                
             }
         }
 
