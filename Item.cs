@@ -5,17 +5,17 @@
 
     public class Item
     {
-        public uint NameStart { get; set; }
-
         public string Name { get; set; }
 
-        public uint Address { get; set; }
+        public uint NameStart { get; set; }
 
-        public string AddressHex
+        public uint BaseAddress { get; set; }
+
+        public string BaseAddressHex
         {
             get
             {
-                return this.Address.ToString("x8").ToUpper();
+                return this.BaseAddress.ToString("x8").ToUpper();
             }
         }
 
@@ -48,53 +48,58 @@
             }
         }
 
-        public uint Modifier1 { get; set; }
+        public string Modifier1Value { get; set; }
 
-        public string Modifier1Hex
+        public string Modifier1Address
         {
             get
             {
-                return this.Modifier1.ToString("x8").ToUpper();
+                var offset = this.BaseAddress + 0x5c;
+                return offset.ToString("x8").ToUpper();
             }
         }
 
-        public uint Modifier2 { get; set; }
+        public string Modifier2Value { get; set; }
 
-        public string Modifier2Hex
+        public string Modifier2Address
         {
             get
             {
-                return this.Modifier2.ToString("x8").ToUpper();
+                var offset = this.BaseAddress + 0x60;
+                return offset.ToString("x8").ToUpper();
             }
         }
 
-        public uint Modifier3 { get; set; }
+        public string Modifier3Value { get; set; }
 
-        public string Modifier3Hex
+        public string Modifier3Address
         {
             get
             {
-                return this.Modifier3.ToString("x8").ToUpper();
+                var offset = this.BaseAddress + 0x64;
+                return offset.ToString("x8").ToUpper();
             }
         }
 
-        public uint Modifier4 { get; set; }
+        public string Modifier4Value { get; set; }
 
-        public string Modifier4Hex
+        public string Modifier4Address
         {
             get
             {
-                return this.Modifier4.ToString("x8").ToUpper();
+                var offset = this.BaseAddress + 0x68;
+                return offset.ToString("x8").ToUpper();
             }
         }
 
-        public uint Modifier5 { get; set; }
+        public string Modifier5Value { get; set; }
 
-        public string Modifier5Hex
+        public string Modifier5Address
         {
             get
             {
-                return this.Modifier5.ToString("x8").ToUpper();
+                var offset = this.BaseAddress + 0x6c;
+                return offset.ToString("x8").ToUpper();
             }
         }
 

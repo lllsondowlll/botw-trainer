@@ -133,14 +133,14 @@
             {
                 this.DebugData();
 
-                this.LoadTab(this.Weapons, new[] { 0 });
-                this.LoadTab(this.Bows, new[] { 1 });
-                this.LoadTab(this.Arrows, new[] { 2 });
-                this.LoadTab(this.Shields, new[] { 3 });
-                this.LoadTab(this.Armour, new[] { 4, 5, 6 });
-                this.LoadTab(this.Materials, new[] { 7 });
-                this.LoadTab(this.Food, new[] { 8 });
-                this.LoadTab(this.KeyItems, new[] { 9 });
+                this.LoadTab(this.Weapons, 0);
+                this.LoadTab(this.Bows, 1);
+                this.LoadTab(this.Arrows, 2);
+                this.LoadTab(this.Shields, 3);
+                this.LoadTab(this.Armour, 4);
+                this.LoadTab(this.Materials, 7);
+                this.LoadTab(this.Food, 8);
+                this.LoadTab(this.KeyItems, 9);
 
                 CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
                 CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
@@ -175,11 +175,10 @@
                 {
                     foreach (var item in weaponList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                         if (foundTextBox != null)
                         {
                             var offset = (uint)(SaveItemStart + (y * 0x8));
-
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
 
@@ -194,7 +193,7 @@
 
                     foreach (var item in bowList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                         if (foundTextBox != null)
                         {
                             var offset = (uint)(SaveItemStart + (y * 0x8));
@@ -213,7 +212,7 @@
 
                     foreach (var item in shieldList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                         if (foundTextBox != null)
                         {
                             var offset = (uint)(SaveItemStart + (y * 0x8));
@@ -232,11 +231,11 @@
 
                     foreach (var item in armourList)
                     {
-                        var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
+                        var offset = (uint)(SaveItemStart + (y * 0x8));
+
+                        var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                         if (foundTextBox != null)
                         {
-                            var offset = (uint)(SaveItemStart + (y * 0x8));
-
                             this.tcpGecko.poke32(offset, Convert.ToUInt32(foundTextBox.Text));
                         }
 
@@ -244,41 +243,97 @@
                     }
                 }
 
-                MessageBox.Show("Data sent. Please save/load the game.");
+                MessageBox.Show("Data sent. Please save/load the game if you changed the Item Value.");
             }
 
-            // Here we can poke the values we see in Debug as it has and immediate effect
-            if (Equals(tab, this.Arrows) || Equals(tab, this.Materials) || Equals(tab, this.Food) || Equals(tab, this.KeyItems))
+            // Here we can poke the values as it has and immediate effect
+            //if (Equals(tab, this.Arrows) || Equals(tab, this.Materials) || Equals(tab, this.Food) || Equals(tab, this.KeyItems))
+            var page = 0;
+            switch (tab.Name)
             {
-                var page = 0;
-
-                if (Equals(tab, this.Arrows))
-                {
-                    // Just arrows
+                case "Weapons":
+                    page = 0;
+                    break;
+                case "Bows":
+                    page = 1;
+                    break;
+                case "Shields":
+                    page = 3;
+                    break;
+                case "Arrows":
                     page = 2;
-                }
-
-                if (Equals(tab, this.Materials))
-                {
+                    break;
+                case "Materials":
                     page = 7;
-                }
-
-                if (Equals(tab, this.Food))
-                {
+                    break;
+                case "Food":
                     page = 8;
-                }
-
-                if (Equals(tab, this.KeyItems))
-                {
+                    break;
+                case "KeyItems":
                     page = 9;
+                    break;
+            }
+
+            foreach (var item in this.items.Where(x => x.Page == page))
+            {
+                var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
+                if (foundTextBox != null)
+                {
+                    this.tcpGecko.poke32(item.BaseAddress + 0x8, Convert.ToUInt32(foundTextBox.Text));
                 }
 
-                foreach (var item in this.items.Where(x => x.Page == page))
+                foundTextBox = (TextBox)this.FindName("Item_" + item.Modifier1Address);
+                if (foundTextBox != null)
                 {
-                    var foundTextBox = (TextBox)this.FindName("Item_" + item.AddressHex);
-                    if (foundTextBox != null)
+                    uint val;
+                    bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                    if (parsed)
                     {
-                        this.tcpGecko.poke32(item.Address + 0x8, Convert.ToUInt32(foundTextBox.Text));
+                        this.tcpGecko.poke32(item.BaseAddress + 0x5C, val);
+                    }
+                }
+
+                foundTextBox = (TextBox)this.FindName("Item_" + item.Modifier2Address);
+                if (foundTextBox != null)
+                {
+                    uint val;
+                    bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                    if (parsed)
+                    {
+                        this.tcpGecko.poke32(item.BaseAddress + 0x60, val);
+                    }
+                }
+
+                foundTextBox = (TextBox)this.FindName("Item_" + item.Modifier3Address);
+                if (foundTextBox != null)
+                {
+                    uint val;
+                    bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                    if (parsed)
+                    {
+                        this.tcpGecko.poke32(item.BaseAddress + 0x64, val);
+                    }
+                }
+
+                foundTextBox = (TextBox)this.FindName("Item_" + item.Modifier4Address);
+                if (foundTextBox != null)
+                {
+                    uint val;
+                    bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                    if (parsed)
+                    {
+                        this.tcpGecko.poke32(item.BaseAddress + 0x68, val);
+                    }
+                }
+
+                foundTextBox = (TextBox)this.FindName("Item_" + item.Modifier5Address);
+                if (foundTextBox != null)
+                {
+                    uint val;
+                    bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                    if (parsed)
+                    {
+                        this.tcpGecko.poke32(item.BaseAddress + 0x6C, val);
                     }
                 }
             }
@@ -341,19 +396,17 @@
             dump.Position = 0;
             */
 
-            //Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
-
             try
             {
                 var x = 0;
                 var itemsFound = 0;
 
-                var end = ItemEnd;
+                var currentItem = ItemEnd;
 
-                while (end >= ItemStart)
+                while (currentItem >= ItemStart)
                 {
                     // Skip FFFFFFFF invalild items
-                    var page = this.tcpGecko.peek(end);
+                    var page = this.tcpGecko.peek(currentItem);
                     if (page > 9)
                     {
                         Dispatcher.Invoke(
@@ -365,26 +418,31 @@
                         var currentPercent1 = (100m / 418m) * x;
                         Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent1)));
 
-                        end -= 0x220;
+                        currentItem -= 0x220;
                         x++;
 
                         continue;
                     }
 
+                    if (page == 5 || page == 6)
+                    {
+                        page = 4;
+                    }
+
                     var item = new Item
                                    {
-                                       Address = end,
+                                       BaseAddress = currentItem,
                                        Page = Convert.ToInt32(page),
-                                       Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
-                                       Value = this.tcpGecko.peek(end + 0x8),
-                                       Equipped = this.tcpGecko.peek(end + 0xC),
-                                       NameStart = this.tcpGecko.peek(end + 0x1C),
-                                       Name = this.ReadString(end + 0x1C),
-                                       Modifier1 = this.tcpGecko.peek(end + 0x5C),
-                                       Modifier2 = this.tcpGecko.peek(end + 0x60),
-                                       Modifier3 = this.tcpGecko.peek(end + 0x64),
-                                       Modifier4 = this.tcpGecko.peek(end + 0x68),
-                                       Modifier5 = this.tcpGecko.peek(end + 0x6C)
+                                       Unknown = Convert.ToInt32(this.tcpGecko.peek(currentItem + 0x4)),
+                                       Value = this.tcpGecko.peek(currentItem + 0x8),
+                                       Equipped = this.tcpGecko.peek(currentItem + 0xC),
+                                       NameStart = this.tcpGecko.peek(currentItem + 0x1C),
+                                       Name = this.ReadString(currentItem + 0x1C),
+                                       Modifier1Value = this.tcpGecko.peek(currentItem + 0x5C).ToString("x8").ToUpper(),
+                                       Modifier2Value = this.tcpGecko.peek(currentItem + 0x60).ToString("x8").ToUpper(),
+                                       Modifier3Value = this.tcpGecko.peek(currentItem + 0x64).ToString("x8").ToUpper(),
+                                       Modifier4Value = this.tcpGecko.peek(currentItem + 0x68).ToString("x8").ToUpper(),
+                                       Modifier5Value = this.tcpGecko.peek(currentItem + 0x6C).ToString("x8").ToUpper()
                                    };
 
                     this.items.Add(item);
@@ -398,7 +456,7 @@
                     var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
 
-                    end -= 0x220;
+                    currentItem -= 0x220;
                     x++;
                     itemsFound++;
                 }
@@ -413,7 +471,7 @@
             }
         }
 
-        private void LoadTab(TabItem tab, IEnumerable<int> pages)
+        private void LoadTab(TabItem tab, int page)
         {
             var scroll = new ScrollViewer { Name = "ScrollContent", Margin = new Thickness(10), VerticalAlignment = VerticalAlignment.Top };
 
@@ -433,6 +491,7 @@
 
             grid.RowDefinitions.Add(new RowDefinition());
 
+            // Headers
             var itemHeader = new TextBlock
             {
                 Text = "Item Name",
@@ -474,195 +533,196 @@
                 grid.Children.Add(header);
             }
 
-
             var x = 1;
+            var list = this.items.Where(i => i.Page == page).OrderBy(i => i.BaseAddress);
 
-            foreach (var page in pages)
+            if (this.itemOrderDescending)
             {
-                var thisPage = page;
-                var list = this.items.Where(i => i.Page == thisPage).OrderBy(i => i.Address);
-
-                if (this.itemOrderDescending)
-                {
-                    list = list.OrderByDescending(i => i.Address);
-                }
-
-                foreach (var item in list)
-                {
-                    grid.RowDefinitions.Add(new RowDefinition());
-
-                    var value = item.Value;
-                    if (value > int.MaxValue)
-                    {
-                        value = 0;
-                    }
-
-                    var lb = new Label
-                    {
-                        Content = item.Name, 
-                        ToolTip = item.Address.ToString("X"), 
-                        Margin = new Thickness(0),
-                        Height = 30
-                    };
-
-                    Grid.SetRow(lb, x);
-                    Grid.SetColumn(lb, 0);
-                    grid.Children.Add(lb);
-
-                    // Value
-                    var tb = new TextBox
-                    {
-                        Text = value.ToString(CultureInfo.InvariantCulture), 
-                        Width = 70, 
-                        Height = 26, 
-                        Margin = new Thickness(0), 
-                        Name = "Item_" + item.AddressHex, 
-                        IsEnabled = true
-                    };
-
-                    tb.PreviewTextInput += this.NumberValidationTextBox;
-
-                    var check = (TextBox)this.FindName("Item_" + item.AddressHex);
-                    if (check != null)
-                    {
-                        this.UnregisterName("Item_" + item.AddressHex);
-                    }
-
-                    this.RegisterName("Item_" + item.AddressHex, tb);
-
-                    Grid.SetRow(tb, x);
-                    Grid.SetColumn(tb, 1);
-                    grid.Children.Add(tb);
-
-
-                    // Mod1
-                    var tb1 = new TextBox
-                    {
-                        Text = item.Modifier1Hex,
-                        Width = 70,
-                        Height = 26,
-                        Margin = new Thickness(0),
-                        Name = "Item_" + item.Modifier1Hex,
-                        IsEnabled = true,
-                        CharacterCasing = CharacterCasing.Upper,
-                        MaxLength = 8
-                    };
-
-                    var check1 = (TextBox)this.FindName("Item_" + item.Modifier1Hex);
-                    if (check1 != null)
-                    {
-                        this.UnregisterName("Item_" + item.Modifier1Hex);
-                    }
-
-                    this.RegisterName("Item_" + item.Modifier1Hex, tb1);
-
-                    Grid.SetRow(tb1, x);
-                    Grid.SetColumn(tb1, 2);
-                    grid.Children.Add(tb1);
-
-                    // Mod2
-                    var tb2 = new TextBox
-                    {
-                        Text = item.Modifier2Hex,
-                        Width = 70,
-                        Height = 26,
-                        Margin = new Thickness(0),
-                        Name = "Item_" + item.Modifier2Hex,
-                        IsEnabled = true,
-                        CharacterCasing = CharacterCasing.Upper,
-                        MaxLength = 8
-                    };
-
-                    var check2 = (TextBox)this.FindName("Item_" + item.Modifier2Hex);
-                    if (check2 != null)
-                    {
-                        this.UnregisterName("Item_" + item.Modifier2Hex);
-                    }
-
-                    this.RegisterName("Item_" + item.Modifier2Hex, tb2);
-
-                    Grid.SetRow(tb2, x);
-                    Grid.SetColumn(tb2, 3);
-                    grid.Children.Add(tb2);
-
-                    // Mod3
-                    var tb3 = new TextBox
-                    {
-                        Text = item.Modifier3Hex,
-                        Width = 70,
-                        Height = 26,
-                        Margin = new Thickness(0),
-                        Name = "Item_" + item.Modifier3Hex,
-                        IsEnabled = true,
-                        CharacterCasing = CharacterCasing.Upper,
-                        MaxLength = 8
-                    };
-
-                    var check3 = (TextBox)this.FindName("Item_" + item.Modifier3Hex);
-                    if (check3 != null)
-                    {
-                        this.UnregisterName("Item_" + item.Modifier3Hex);
-                    }
-
-                    this.RegisterName("Item_" + item.Modifier3Hex, tb3);
-
-                    Grid.SetRow(tb3, x);
-                    Grid.SetColumn(tb3, 4);
-                    grid.Children.Add(tb3);
-
-                    // Mod4
-                    var tb4 = new TextBox
-                    {
-                        Text = item.Modifier4Hex,
-                        Width = 70,
-                        Height = 26,
-                        Margin = new Thickness(0),
-                        Name = "Item_" + item.Modifier4Hex,
-                        IsEnabled = true,
-                        CharacterCasing = CharacterCasing.Upper,
-                        MaxLength = 8
-                    };
-
-                    var check4 = (TextBox)this.FindName("Item_" + item.Modifier4Hex);
-                    if (check4 != null)
-                    {
-                        this.UnregisterName("Item_" + item.Modifier4Hex);
-                    }
-
-                    this.RegisterName("Item_" + item.Modifier4Hex, tb4);
-
-                    Grid.SetRow(tb4, x);
-                    Grid.SetColumn(tb4, 5);
-                    grid.Children.Add(tb4);
-
-                    // Mod5
-                    var tb5 = new TextBox
-                    {
-                        Text = item.Modifier5Hex,
-                        Width = 70,
-                        Height = 26,
-                        Margin = new Thickness(0),
-                        Name = "Item_" + item.Modifier5Hex,
-                        IsEnabled = true,
-                        CharacterCasing = CharacterCasing.Upper,
-                        MaxLength = 8
-                    };
-
-                    var check5 = (TextBox)this.FindName("Item_" + item.Modifier5Hex);
-                    if (check5 != null)
-                    {
-                        this.UnregisterName("Item_" + item.Modifier5Hex);
-                    }
-
-                    this.RegisterName("Item_" + item.Modifier5Hex, tb5);
-
-                    Grid.SetRow(tb5, x);
-                    Grid.SetColumn(tb5, 6);
-                    grid.Children.Add(tb5);
-
-                    x++;
-                }
+                list = list.OrderByDescending(i => i.BaseAddress);
             }
+
+            foreach (var item in list)
+            {
+                grid.RowDefinitions.Add(new RowDefinition());
+
+                var value = item.Value;
+                if (value > int.MaxValue)
+                {
+                    value = 0;
+                }
+
+                var name = new TextBox
+                {
+                    Text = item.Name,
+                    ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
+                    //ToolTip = item.Address.ToString("x8").ToUpper(), 
+                    Margin = new Thickness(0),
+                    Height = 22
+                };
+
+                Grid.SetRow(name, x);
+                Grid.SetColumn(name, 0);
+                grid.Children.Add(name);
+
+                // Value
+                var tb = new TextBox
+                {
+                    Text = value.ToString(CultureInfo.InvariantCulture), 
+                    Width = 70, 
+                    Height = 22, 
+                    Margin = new Thickness(0), 
+                    Name = "Item_" + item.BaseAddressHex,
+                    IsEnabled = true
+                };
+
+                tb.PreviewTextInput += this.NumberValidationTextBox;
+
+                var check = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
+                if (check != null)
+                {
+                    this.UnregisterName("Item_" + item.BaseAddressHex);
+                }
+
+                this.RegisterName("Item_" + item.BaseAddressHex, tb);
+
+                Grid.SetRow(tb, x);
+                Grid.SetColumn(tb, 1);
+                grid.Children.Add(tb);
+
+
+                // Mod1
+                var tb1 = new TextBox
+                {
+                    Text = item.Modifier1Value,
+                    ToolTip = item.Modifier1Address,
+                    Width = 70,
+                    Height = 26,
+                    Margin = new Thickness(0),
+                    Name = "Item_" + item.Modifier1Address,
+                    IsEnabled = true,
+                    CharacterCasing = CharacterCasing.Upper,
+                    MaxLength = 8
+                };
+
+                var check1 = (TextBox)this.FindName("Item_" + item.Modifier1Address);
+                if (check1 != null)
+                {
+                    this.UnregisterName("Item_" + item.Modifier1Address);
+                }
+
+                this.RegisterName("Item_" + item.Modifier1Address, tb1);
+
+                Grid.SetRow(tb1, x);
+                Grid.SetColumn(tb1, 2);
+                grid.Children.Add(tb1);
+
+                // Mod2
+                var tb2 = new TextBox
+                {
+                    Text = item.Modifier2Value,
+                    ToolTip = item.Modifier2Address,
+                    Width = 70,
+                    Height = 26,
+                    Margin = new Thickness(0),
+                    Name = "Item_" + item.Modifier2Address,
+                    IsEnabled = true,
+                    CharacterCasing = CharacterCasing.Upper,
+                    MaxLength = 8
+                };
+
+                var check2 = (TextBox)this.FindName("Item_" + item.Modifier2Address);
+                if (check2 != null)
+                {
+                    this.UnregisterName("Item_" + item.Modifier2Address);
+                }
+
+                this.RegisterName("Item_" + item.Modifier2Address, tb2);
+
+                Grid.SetRow(tb2, x);
+                Grid.SetColumn(tb2, 3);
+                grid.Children.Add(tb2);
+
+                // Mod3
+                var tb3 = new TextBox
+                {
+                    Text = item.Modifier3Value,
+                    ToolTip = item.Modifier3Address,
+                    Width = 70,
+                    Height = 26,
+                    Margin = new Thickness(0),
+                    Name = "Item_" + item.Modifier3Address,
+                    IsEnabled = true,
+                    CharacterCasing = CharacterCasing.Upper,
+                    MaxLength = 8
+                };
+
+                var check3 = (TextBox)this.FindName("Item_" + item.Modifier3Address);
+                if (check3 != null)
+                {
+                    this.UnregisterName("Item_" + item.Modifier3Address);
+                }
+
+                this.RegisterName("Item_" + item.Modifier3Address, tb3);
+
+                Grid.SetRow(tb3, x);
+                Grid.SetColumn(tb3, 4);
+                grid.Children.Add(tb3);
+
+                // Mod4
+                var tb4 = new TextBox
+                {
+                    Text = item.Modifier4Value,
+                    ToolTip = item.Modifier4Address,
+                    Width = 70,
+                    Height = 26,
+                    Margin = new Thickness(0),
+                    Name = "Item_" + item.Modifier4Address,
+                    IsEnabled = true,
+                    CharacterCasing = CharacterCasing.Upper,
+                    MaxLength = 8
+                };
+
+                var check4 = (TextBox)this.FindName("Item_" + item.Modifier4Address);
+                if (check4 != null)
+                {
+                    this.UnregisterName("Item_" + item.Modifier4Address);
+                }
+
+                this.RegisterName("Item_" + item.Modifier4Address, tb4);
+
+                Grid.SetRow(tb4, x);
+                Grid.SetColumn(tb4, 5);
+                grid.Children.Add(tb4);
+
+                // Mod5
+                var tb5 = new TextBox
+                {
+                    Text = item.Modifier5Value,
+                    ToolTip = item.Modifier5Address,
+                    Width = 70,
+                    Height = 26,
+                    Margin = new Thickness(0),
+                    Name = "Item_" + item.Modifier5Address,
+                    IsEnabled = true,
+                    CharacterCasing = CharacterCasing.Upper,
+                    MaxLength = 8
+                };
+
+                var check5 = (TextBox)this.FindName("Item_" + item.Modifier5Address);
+                if (check5 != null)
+                {
+                    this.UnregisterName("Item_" + item.Modifier5Address);
+                }
+
+                this.RegisterName("Item_" + item.Modifier5Address, tb5);
+
+                Grid.SetRow(tb5, x);
+                Grid.SetColumn(tb5, 6);
+                grid.Children.Add(tb5);
+
+                x++;
+            }
+            
 
             grid.Height = x * 34;
 
@@ -884,13 +944,13 @@
             if (state == "Disconnected")
             {
                 Load.IsEnabled = !this.connected;
-                this.Connect.IsEnabled = this.connected;
+                this.Connect.IsEnabled = true;
                 this.Connect.Visibility = Visibility.Visible;
-                this.Disconnect.IsEnabled = !this.connected;
+                this.Disconnect.IsEnabled = false;
                 this.Disconnect.Visibility = Visibility.Hidden;
                 this.IpAddress.IsEnabled = this.connected;
 
-                TabControl.IsEnabled = false;
+                //TabControl.IsEnabled = false;
                 this.Save.IsEnabled = false;
                 this.Refresh.IsEnabled = false;
             }
@@ -970,22 +1030,18 @@
 
             var builder = new StringBuilder();
 
-            long endName = 0;
-
             for (var i = 0; i < dump.Length; i++)
             {
                 var data = dump.ReadByte();
                 if (data == 0)
                 {
-                    endName = dump.Position;
                     break;
                 }
 
                 builder.Append((char)data);
             }
 
-            var test = endName;
-            var name = builder.ToString().Replace("_", " ");
+            var name = builder.ToString();
 
             return name;
         }
