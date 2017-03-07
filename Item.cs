@@ -32,7 +32,11 @@
             get
             {
                 var a = BitConverter.GetBytes(this.Equipped);
-                return a.Reverse().First().ToString("X");
+                var b = (a.Reverse().First());
+                var c = "-";
+                if (b == 1) { 
+                    c = "Equipped"; }
+                return c.ToString();
             }
         }
 
