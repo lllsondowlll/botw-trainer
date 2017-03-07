@@ -34,5 +34,29 @@ namespace BotwTrainer.Properties {
                 this["IpAddress"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://raw.githubusercontent.com/joffnerd/botw-trainer/master/")]
+        public string VersionUrl {
+            get {
+                return ((string)(this["VersionUrl"]));
+            }
+            set {
+                this["VersionUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.7")]
+        public string CurrentVersion {
+            get {
+                return ((string)(this["CurrentVersion"]));
+            }
+            set {
+                this["CurrentVersion"] = value;
+            }
+        }
     }
 }

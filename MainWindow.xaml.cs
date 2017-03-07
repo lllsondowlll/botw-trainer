@@ -3,7 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
+    using System.Net;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows;
@@ -25,7 +28,7 @@
 
         // 0x140 (320) is the amount of items to search for in memory. Over estimating at this point.
         // We start at the end and go back in jumps of 0x220 getting data 320 times
-        private const uint ItemStart = ItemEnd - (0x140 * 0x220);
+        private const uint ItemStart = 0x43C6B2AC; // ItemEnd - (0x140 * 0x220);
 
         private const uint CodeHandlerStart = 0x01133000;
 
@@ -34,6 +37,12 @@
         private const uint CodeHandlerEnabled = 0x10014CFC;
 
         private readonly List<Item> items;
+
+        private readonly WebClient client;
+
+        private readonly string version;
+
+        private bool itemOrderDescending = true;
 
         private TCPGecko tcpGecko;
 
@@ -44,6 +53,13 @@
             this.InitializeComponent();
 
             IpAddress.Text = Settings.Default.IpAddress;
+            this.version = Settings.Default.CurrentVersion;
+
+            this.Title = string.Format("{0} v{1}", this.Title, this.version);
+
+            this.client = new WebClient { BaseAddress = Settings.Default.VersionUrl, Encoding = Encoding.UTF8 };
+            this.client.DownloadStringCompleted += this.ClientDownloadStringCompleted;
+            this.client.DownloadStringAsync(new Uri(string.Format("{0}{1}", this.client.BaseAddress, "version.txt")));
 
             this.items = new List<Item>();
         }
@@ -53,10 +69,31 @@
             Stamina = 0,
             Health = 1,
             Run = 2,
-            Rupees = 3
+            Rupees = 3,
+            MoonJump = 4,
+            WeaponInv = 5,
+            BowInv = 6,
+            ShieldInv = 7
         }
 
-        private void ConnectClick(object sender, RoutedEventArgs e)
+        private void ClientDownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                var result = e.Result;
+                if (result != this.version)
+                {
+                    MessageBox.Show(string.Format("An update is available: {0}", result));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error checking for new version");
+            }
+        }
+
+        private
+            void ConnectClick(object sender, RoutedEventArgs e)
         {
             this.tcpGecko = new TCPGecko(this.IpAddress.Text, 7331);
 
@@ -70,7 +107,6 @@
                     Settings.Default.Save();
 
                     this.ToggleControls();
-                    this.Continue.Visibility = Visibility.Visible;
                 }
             }
             catch (ETCPGeckoException ex)
@@ -122,7 +158,13 @@
                 this.LoadTab(this.Food, new[] { 8 });
                 this.LoadTab(this.KeyItems, new[] { 9 });
 
+                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
+                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
+
+                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
+                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
+                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
 
                 this.Save.IsEnabled = true;
 
@@ -135,42 +177,80 @@
 
         private void LoadTab(TabItem tab, IEnumerable<int> pages)
         {
-            var panel = new WrapPanel { Name = "PanelContent" };
+            var scroll = new ScrollViewer { Name = "ScrollContent", Margin = new Thickness(10), VerticalAlignment = VerticalAlignment.Top};
+
+            var grid = new Grid { Name = "PanelContent", Margin = new Thickness(0), ShowGridLines = false, VerticalAlignment = VerticalAlignment.Top};
+            
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            grid.RowDefinitions.Add(new RowDefinition());
+
+            var itemHeader = new TextBlock
+            {
+                Text = "Item Name",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold
+            };
+            Grid.SetRow(itemHeader, 0);
+            Grid.SetColumn(itemHeader, 0);
+            grid.Children.Add(itemHeader);
+
+            var valueHeader = new TextBlock
+            {
+                Text = "Item Value",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            Grid.SetRow(valueHeader, 0);
+            Grid.SetColumn(valueHeader, 1);
+            grid.Children.Add(valueHeader);
 
             var x = 1;
 
             foreach (var page in pages)
             {
-                var list = this.items.Where(i => i.Page == page).OrderByDescending(i => i.Address).ToList();
+                var thisPage = page;
+                var list = this.items.Where(i => i.Page == thisPage).OrderBy(i => i.Address);
+
+                if (this.itemOrderDescending)
+                {
+                    list = list.OrderByDescending(i => i.Address);
+                }
 
                 foreach (var item in list)
                 {
-                    var label = string.Format("Item {0}:", x);
+                    grid.RowDefinitions.Add(new RowDefinition());
+
                     var value = item.Value;
                     if (value > int.MaxValue)
                     {
                         value = 0;
                     }
 
-                    panel.Children.Add(new Label
-                                           {
-                                               Content = label,
-                                               ToolTip = item.Address.ToString("X"),
-                                               Width = 55,
-                                               Margin = new Thickness(15, 20, 5, 30)
-                                           });
+                    var lb = new Label
+                    {
+                        Content = item.Name, 
+                        ToolTip = item.Address.ToString("X"), 
+                        Margin = new Thickness(0),
+                        Height = 30
+                    };
 
-                    var isArmour = item.Page == 4 || item.Page == 5 || item.Page == 6;
+                    Grid.SetRow(lb, x);
+                    Grid.SetColumn(lb, 0);
 
                     var tb = new TextBox
-                                 {
-                                     Text = value.ToString(CultureInfo.InvariantCulture),
-                                     Width = 60,
-                                     Height = 22,
-                                     Margin = new Thickness(0, 20, 10, 30),
-                                     Name = "Item_" + item.AddressHex,
-                                     IsEnabled = !isArmour
-                                 };
+                    {
+                        Text = value.ToString(CultureInfo.InvariantCulture), 
+                        Width = 70, 
+                        Height = 26, 
+                        Margin = new Thickness(0), 
+                        Name = "Item_" + item.AddressHex, 
+                        IsEnabled = true
+                    };
 
                     tb.PreviewTextInput += this.NumberValidationTextBox;
 
@@ -182,39 +262,67 @@
 
                     this.RegisterName("Item_" + item.AddressHex, tb);
 
-                    panel.Children.Add(tb);
+                    Grid.SetRow(tb, x);
+                    Grid.SetColumn(tb, 1);
+
+                    grid.Children.Add(lb);
+                    grid.Children.Add(tb);
 
                     x++;
                 }
             }
 
+            grid.Height = x * 34;
+
+            scroll.Content = grid;
+
             if (tab.Name == "Materials")
             {
-                MaterialsContent.Content = panel;
+                MaterialsContent.Content = scroll;
                 return;
             }
 
-            tab.Content = panel;
+            tab.Content = scroll;
         }
 
         private bool LoadDataAsync()
         {
-            Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
+            // TODO: Dump the entire item block instead of peeking
+            /*
+            var dump = new MemoryStream();
+            this.tcpGecko.Dump(ItemStart, ItemEnd, dump);
+            dump.Position = 0;
+            */
+
+            //Dispatcher.Invoke(() => { Continue.Content = "Loading..."; });
 
             try
             {
                 var x = 0;
+                var itemsFound = 0;
 
-                uint end = ItemEnd;
+                var end = ItemEnd;
 
                 while (end >= ItemStart)
                 {
-                    // If we start to hit FFFFFFFF then we break as its the end of the items
+                    // Skip FFFFFFFF invalild items
                     var page = this.tcpGecko.peek(end);
                     if (page > 9)
                     {
-                        Dispatcher.Invoke(() => this.UpdateProgress(100));
-                        break;
+                        Dispatcher.Invoke(
+                            () =>
+                                {
+                                    //Continue.Content = string.Format("Skipping...Items found: {0}", itemsFound);
+                                    ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                                });
+
+                        var currentPercent1 = (100m / 418m) * x;
+                        Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent1)));
+
+                        end -= 0x220;
+                        x++;
+
+                        continue;
                     }
 
                     var item = new Item
@@ -224,19 +332,27 @@
                         Unknown = Convert.ToInt32(this.tcpGecko.peek(end + 0x4)),
                         Value = this.tcpGecko.peek(end + 0x8),
                         Equipped = this.tcpGecko.peek(end + 0xC),
+                        NameStart = this.tcpGecko.peek(end + 0x1C),
+                        Name = this.ReadString(end + 0x1C),
                         ModAmount = this.tcpGecko.peek(end + 0x5C),
                         ModType = this.tcpGecko.peek(end + 0x64),
                     };
 
                     this.items.Add(item);
 
-                    Dispatcher.Invoke(() => { Continue.Content = string.Format("Loading...Items found: {0}", x); });
+                    Dispatcher.Invoke(
+                        () =>
+                            {
+                                //Continue.Content = string.Format("Loading...Items found: {0}", itemsFound);
+                                ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                            });
 
-                    var currentPercent = (100m / 320m) * x;
+                    var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
 
                     end -= 0x220;
                     x++;
+                    itemsFound++;
                 }
 
                 return true;
@@ -246,7 +362,7 @@
                 Dispatcher.Invoke(
                     () =>
                         {
-                            Continue.Content = ex.Message;
+                            //Continue.Content = ex.Message;
                             this.connected = false;
                             this.ToggleControls();
                         });
@@ -257,6 +373,34 @@
         private void UpdateProgress(int percent)
         {
             Progress.Value = percent;
+        }
+
+        private string ReadString(uint addr)
+        {
+            var dump = new MemoryStream();
+            this.tcpGecko.Dump(addr, addr + 0x24, dump);
+            dump.Position = 0;
+
+            var builder = new StringBuilder();
+
+            long endName = 0;
+
+            for (var i = 0; i < dump.Length; i++)
+            {
+                var data = dump.ReadByte();
+                if (data == 0)
+                {
+                    endName = dump.Position;
+                    break;
+                }
+
+                builder.Append((char)data);
+            }
+
+            var test = endName;
+            var name = builder.ToString().Replace("_", " ");
+
+            return name;
         }
 
         private void DebugData()
@@ -279,14 +423,30 @@
 
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
-            var rupee3 = this.tcpGecko.peek(0x40E57E78);
-            this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}, 0x40E57E78 = {2}]", rupee1, rupee2, rupee3);
+            this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}]", rupee1, rupee2);
+
+            var weapon1 = this.tcpGecko.peek(0x3FCFB498);
+            var weapon2 = this.tcpGecko.peek(0x4010B34C);
+            this.WeaponSlotsData.Content = string.Format("[0x3FCFB498 = {0}, 0x4010B34C = {1}]", weapon1, weapon2);
+
+            var bow1 = this.tcpGecko.peek(0x3FD4BB50);
+            var bow2 = this.tcpGecko.peek(0x4011126C);
+            this.BowSlotsData.Content = string.Format("[0x3FD4BB50 = {0}, 0x4011126C = {1}]", bow1, bow2);
+
+            var shield1 = this.tcpGecko.peek(0x3FCC0B40);
+            var shield2 = this.tcpGecko.peek(0x4011128C);
+            this.ShieldSlotsData.Content = string.Format("[0x3FCC0B40 = {0}, 0x4011128C = {1}]", shield1, shield2);
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
         {
             // Grab the values from the relevant tab and  poke them back to memory
             var tab = (TabItem)TabControl.SelectedItem;
+
+            if (Equals(tab, this.Debug))
+            {
+                MessageBox.Show("Can't save this data (yet)");
+            }
 
             // For these we amend the 0x3FCE7FF0 area which requires save/load
             if (Equals(tab, this.Weapons) || Equals(tab, this.BowsArrows) || Equals(tab, this.Shields))
@@ -354,7 +514,7 @@
                 MessageBox.Show("Data sent. Please save/load the game.");
             }
 
-            // Here we can poke the values we see in Debug as it has and imemdiate effect
+            // Here we can poke the values we see in Debug as it has and immediate effect
             if (Equals(tab, this.BowsArrows) || Equals(tab, this.Materials) || Equals(tab, this.Food) || Equals(tab, this.KeyItems))
             {
                 var page = 0;
@@ -405,14 +565,34 @@
                     selected.Add(Cheat.Health);
                 }
 
+                if (Rupees.IsChecked == true)
+                {
+                    selected.Add(Cheat.Rupees);
+                }
+
                 if (Run.IsChecked == true)
                 {
                     selected.Add(Cheat.Run);
                 }
 
-                if (Rupees.IsChecked == true)
+                if (MoonJump.IsChecked == true)
                 {
-                    selected.Add(Cheat.Rupees);
+                    selected.Add(Cheat.MoonJump);
+                }
+
+                if (WeaponSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.WeaponInv);
+                }
+
+                if (BowSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.BowInv);
+                }
+
+                if (ShieldSlots.IsChecked == true)
+                {
+                    selected.Add(Cheat.ShieldInv);
                 }
 
                 this.SetCheats(selected);
@@ -434,25 +614,31 @@
 
             var codes = new List<uint>();
 
-            // TODO: These are all 32 bit writes so move first and last line of each to loop at the end to avoid duplicating them
+            // TODO: Consider moving first and last line of each to loop at the end to avoid duplicating them
+            // Most are 32 bit writes
             if (cheats.Contains(Cheat.Stamina))
             {
+                // Max 453B8000
+                var value = uint.Parse(CurrentStamina.Text, NumberStyles.HexNumber);
+
                 codes.Add(0x00020000);
                 codes.Add(0x42439594);
-                codes.Add(0x453B8000);
+                codes.Add(value);
                 codes.Add(0x00000000);
 
                 codes.Add(0x00020000);
                 codes.Add(0x42439598);
-                codes.Add(0x453B8000);
+                codes.Add(value);
                 codes.Add(0x00000000);
             }
 
             if (cheats.Contains(Cheat.Health))
             {
+                var value = Convert.ToUInt32(CurrentHealth.Text);
+
                 codes.Add(0x00020000);
                 codes.Add(0x439B6558);
-                codes.Add(0x00000078);
+                codes.Add(value);
                 codes.Add(0x00000000);
             }
 
@@ -477,9 +663,74 @@
                 codes.Add(0x4010AA0C);
                 codes.Add(value);
                 codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.MoonJump))
+            {
+                codes.Add(0x03020000);
+                codes.Add(0x102F48A8);
+                codes.Add(0x00002000);
+                codes.Add(0x00000000);
+                codes.Add(0x00020000);
+                codes.Add(0x439BF528);
+                codes.Add(0xBF400000);
+                codes.Add(0x00000000);
+                codes.Add(0xD0000000);
+                codes.Add(0xDEADCAFE);
+
+                codes.Add(0x04020000);
+                codes.Add(0x102F48A8);
+                codes.Add(0x00002000);
+                codes.Add(0x00000000);
+                codes.Add(0x00020000);
+                codes.Add(0x439BF528);
+                codes.Add(0x3F800000);
+                codes.Add(0x00000000);
+                codes.Add(0xD0000000);
+                codes.Add(0xDEADCAFE);
+            }
+
+            if (cheats.Contains(Cheat.WeaponInv))
+            {
+                var value = Convert.ToUInt32(CurrentWeaponSlots.Text);
 
                 codes.Add(0x00020000);
-                codes.Add(0x40E57E78);
+                codes.Add(0x3FCFB498);
+                codes.Add(value);
+                codes.Add(0x00000000);
+
+                codes.Add(0x00020000);
+                codes.Add(0x4010B34C);
+                codes.Add(value);
+                codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.BowInv))
+            {
+                var value = Convert.ToUInt32(CurrentBowSlots.Text);
+
+                codes.Add(0x00020000);
+                codes.Add(0x3FD4BB50);
+                codes.Add(value);
+                codes.Add(0x00000000);
+
+                codes.Add(0x00020000);
+                codes.Add(0x4011126C);
+                codes.Add(value);
+                codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.ShieldInv))
+            {
+                var value = Convert.ToUInt32(CurrentShieldSlots.Text);
+
+                codes.Add(0x00020000);
+                codes.Add(0x3FCC0B40);
+                codes.Add(value);
+                codes.Add(0x00000000);
+
+                codes.Add(0x00020000);
+                codes.Add(0x4011128C);
                 codes.Add(value);
                 codes.Add(0x00000000);
             }

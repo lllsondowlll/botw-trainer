@@ -7,14 +7,14 @@
     <framework targetVersion="4.5" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="BotwTrainer.exe.manifest" size="3476">
+    <dependentAssembly dependencyType="install" codebase="BotwTrainer.exe.manifest" size="3952">
       <assemblyIdentity name="BotwTrainer.exe" version="1.0.0.2" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>mU08gW5CmmALxCkifPrra8PKyYJYnEAJPcIqQHj/6l0=</dsig:DigestValue>
+        <dsig:DigestValue>ffVOnWJsBa78RUWmNbbDOhVCJPH1jySuRaUnMFO5Q+I=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

@@ -5,6 +5,10 @@
 
     public class Item
     {
+        public uint NameStart { get; set; }
+
+        public string Name { get; set; }
+
         public uint Address { get; set; }
 
         public string AddressHex
@@ -32,11 +36,7 @@
             get
             {
                 var a = BitConverter.GetBytes(this.Equipped);
-                var b = (a.Reverse().First());
-                var c = "-";
-                if (b == 1) { 
-                    c = "Equipped"; }
-                return c.ToString();
+                return a.Reverse().First().ToString("X");
             }
         }
 
