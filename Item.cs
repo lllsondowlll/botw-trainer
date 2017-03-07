@@ -37,7 +37,7 @@
             {
                 try
                 {
-                    var val = BitConverter.GetBytes(this.Equipped).Reverse().First().ToString("x8");
+                    var val = BitConverter.GetBytes(this.Equipped).Reverse().First().ToString();
                     return val != "0";
                 }
                 catch
