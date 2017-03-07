@@ -36,9 +36,7 @@
 
             <TabItem Header="Arrows" x:Name="Arrows" Margin="0,0,0,0" Background="PaleVioletRed"/>
 
-            <TabItem Header="Materials" x:Name="Materials" Margin="0,0,0,0" Background="PaleVioletRed">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="MaterialsContent" Margin="0" />
-            </TabItem>
+            <TabItem Header="Materials" x:Name="Materials" Margin="0,0,0,0" Background="PaleVioletRed"/>
 
             <TabItem Header="Food" x:Name="Food" Margin="0,0,0,0" Background="PaleVioletRed"/>
 
@@ -95,14 +93,17 @@
 
                     <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Width="150" Binding="{Binding Name}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Address" Width="100" Binding="{Binding AddressHex, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Page" Width="50" Binding="{Binding Page}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Unknown" Width="50" Binding="{Binding Unknown}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Value" Width="100" Binding="{Binding Value}"></DataGridTextColumn>
-                            <DataGridCheckBoxColumn Header="Equipped" Width="75" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"></DataGridCheckBoxColumn>
-                            <DataGridTextColumn Header="Mod Amount" Width="75" Binding="{Binding ModAmountHex, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Mod Type" Width="75" Binding="{Binding ModTypeHex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Address" Width="80" Binding="{Binding AddressHex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding Page}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="?" Width="25" Binding="{Binding Unknown}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"></DataGridTextColumn>
+                            <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"></DataGridCheckBoxColumn>
+                            <DataGridTextColumn Header="Modifier1" Width="75" Binding="{Binding Modifier1Hex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Modifier2" Width="75" Binding="{Binding Modifier2Hex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Modifier3" Width="75" Binding="{Binding Modifier3Hex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Modifier4" Width="75" Binding="{Binding Modifier4Hex, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Modifier5" Width="75" Binding="{Binding Modifier5Hex, Mode=OneWay}"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -167,6 +168,8 @@
                     <Label Content="ItchyOwned"></Label>
                     <Label Content="Shinzuya"></Label>
                     <Label Content="PandaOnSmack"></Label>
+                    <Label Content="Shadow LAG"></Label>
+                    <Label Content="Missing Number"></Label>
                 </StackPanel>
             </TabItem>
         </TabControl>

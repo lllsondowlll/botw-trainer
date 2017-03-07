@@ -12,6 +12,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
+    using System.Windows.Media;
 
     using BotwTrainer.Properties;
 
@@ -358,7 +359,6 @@
                         Dispatcher.Invoke(
                             () =>
                             {
-                                //Continue.Content = string.Format("Skipping...Items found: {0}", itemsFound);
                                 ProgressText.Text = string.Format("{0}/{1}", x, 418);
                             });
 
@@ -379,17 +379,23 @@
                         Value = this.tcpGecko.peek(end + 0x8),
                         Equipped = this.tcpGecko.peek(end + 0xC),
                         NameStart = this.tcpGecko.peek(end + 0x1C),
-                        Name = this.ReadString(end + 0x1C),
-                        ModAmount = this.tcpGecko.peek(end + 0x5C),
-                        ModType = this.tcpGecko.peek(end + 0x64),
+                        Name = this.ReadString(end + 0x1C)
                     };
+
+                    if (page == 8)
+                    {
+                        item.Modifier1 = this.tcpGecko.peek(end + 0x5C);
+                        item.Modifier2 = this.tcpGecko.peek(end + 0x60);
+                        item.Modifier3 = this.tcpGecko.peek(end + 0x64);
+                        item.Modifier4 = this.tcpGecko.peek(end + 0x68);
+                        item.Modifier5 = this.tcpGecko.peek(end + 0x6C);
+                    }
 
                     this.items.Add(item);
 
                     Dispatcher.Invoke(
                         () =>
                         {
-                            //Continue.Content = string.Format("Loading...Items found: {0}", itemsFound);
                             ProgressText.Text = string.Format("{0}/{1}", x, 418);
                         });
 
@@ -413,12 +419,19 @@
 
         private void LoadTab(TabItem tab, IEnumerable<int> pages)
         {
+            var stackPanel = new StackPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
+
             var scroll = new ScrollViewer { Name = "ScrollContent", Margin = new Thickness(10), VerticalAlignment = VerticalAlignment.Top};
 
-            var grid = new Grid { Name = "PanelContent", Margin = new Thickness(0), ShowGridLines = false, VerticalAlignment = VerticalAlignment.Top};
+            // setup grid
+            var grid = new Grid
+                           {
+                               Name = "PanelContent",
+                               Margin = new Thickness(0),
+                               ShowGridLines = false,
+                               VerticalAlignment = VerticalAlignment.Top
+                           };
             
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -444,6 +457,31 @@
             Grid.SetRow(valueHeader, 0);
             Grid.SetColumn(valueHeader, 1);
             grid.Children.Add(valueHeader);
+
+
+            // Food mod test
+            if (Equals(tab, this.Food))
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+                grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+                for (int y = 1; y < 6; y++)
+                {
+                    var header = new TextBlock
+                    {
+                        Text = "Modifier " + y,
+                        FontSize = 14,
+                        FontWeight = FontWeights.Bold,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+                    Grid.SetRow(header, 0);
+                    Grid.SetColumn(header, y + 1);
+                    grid.Children.Add(header);
+                }
+            }
 
             var x = 1;
 
@@ -477,7 +515,9 @@
 
                     Grid.SetRow(lb, x);
                     Grid.SetColumn(lb, 0);
+                    grid.Children.Add(lb);
 
+                    // Value
                     var tb = new TextBox
                     {
                         Text = value.ToString(CultureInfo.InvariantCulture), 
@@ -500,9 +540,136 @@
 
                     Grid.SetRow(tb, x);
                     Grid.SetColumn(tb, 1);
-
-                    grid.Children.Add(lb);
                     grid.Children.Add(tb);
+
+                    if (Equals(tab, this.Food))
+                    {
+                        // Mod1
+                        var tb1 = new TextBox
+                        {
+                            Text = item.Modifier1Hex,
+                            Width = 70,
+                            Height = 26,
+                            Margin = new Thickness(0),
+                            Name = "Item_" + item.Modifier1Hex,
+                            IsEnabled = true,
+                            CharacterCasing = CharacterCasing.Upper,
+                            MaxLength = 8
+                        };
+
+                        var check1 = (TextBox)this.FindName("Item_" + item.Modifier1Hex);
+                        if (check1 != null)
+                        {
+                            this.UnregisterName("Item_" + item.Modifier1Hex);
+                        }
+
+                        this.RegisterName("Item_" + item.Modifier1Hex, tb1);
+
+                        Grid.SetRow(tb1, x);
+                        Grid.SetColumn(tb1, 2);
+                        grid.Children.Add(tb1);
+
+                        // Mod2
+                        var tb2 = new TextBox
+                        {
+                            Text = item.Modifier2Hex,
+                            Width = 70,
+                            Height = 26,
+                            Margin = new Thickness(0),
+                            Name = "Item_" + item.Modifier2Hex,
+                            IsEnabled = true,
+                            CharacterCasing = CharacterCasing.Upper,
+                            MaxLength = 8
+                        };
+
+                        var check2 = (TextBox)this.FindName("Item_" + item.Modifier2Hex);
+                        if (check2 != null)
+                        {
+                            this.UnregisterName("Item_" + item.Modifier2Hex);
+                        }
+
+                        this.RegisterName("Item_" + item.Modifier2Hex, tb2);
+
+                        Grid.SetRow(tb2, x);
+                        Grid.SetColumn(tb2, 3);
+                        grid.Children.Add(tb2);
+
+                        // Mod3
+                        var tb3 = new TextBox
+                        {
+                            Text = item.Modifier3Hex,
+                            Width = 70,
+                            Height = 26,
+                            Margin = new Thickness(0),
+                            Name = "Item_" + item.Modifier3Hex,
+                            IsEnabled = true,
+                            CharacterCasing = CharacterCasing.Upper,
+                            MaxLength = 8
+                        };
+
+                        var check3 = (TextBox)this.FindName("Item_" + item.Modifier3Hex);
+                        if (check3 != null)
+                        {
+                            this.UnregisterName("Item_" + item.Modifier3Hex);
+                        }
+
+                        this.RegisterName("Item_" + item.Modifier3Hex, tb3);
+
+                        Grid.SetRow(tb3, x);
+                        Grid.SetColumn(tb3, 4);
+                        grid.Children.Add(tb3);
+
+                        // Mod4
+                        var tb4 = new TextBox
+                        {
+                            Text = item.Modifier4Hex,
+                            Width = 70,
+                            Height = 26,
+                            Margin = new Thickness(0),
+                            Name = "Item_" + item.Modifier4Hex,
+                            IsEnabled = true,
+                            CharacterCasing = CharacterCasing.Upper,
+                            MaxLength = 8
+                        };
+
+                        var check4 = (TextBox)this.FindName("Item_" + item.Modifier4Hex);
+                        if (check4 != null)
+                        {
+                            this.UnregisterName("Item_" + item.Modifier4Hex);
+                        }
+
+                        this.RegisterName("Item_" + item.Modifier4Hex, tb4);
+
+                        Grid.SetRow(tb4, x);
+                        Grid.SetColumn(tb4, 5);
+                        grid.Children.Add(tb4);
+
+                        // Mod5
+                        var tb5 = new TextBox
+                        {
+                            Text = item.Modifier5Hex,
+                            Width = 70,
+                            Height = 26,
+                            Margin = new Thickness(0),
+                            Name = "Item_" + item.Modifier5Hex,
+                            IsEnabled = true,
+                            CharacterCasing = CharacterCasing.Upper,
+                            MaxLength = 8
+                        };
+
+                        var check5 = (TextBox)this.FindName("Item_" + item.Modifier5Hex);
+                        if (check5 != null)
+                        {
+                            this.UnregisterName("Item_" + item.Modifier5Hex);
+                        }
+
+                        this.RegisterName("Item_" + item.Modifier5Hex, tb5);
+
+                        Grid.SetRow(tb5, x);
+                        Grid.SetColumn(tb5, 6);
+                        grid.Children.Add(tb5);
+                    }
+
 
                     x++;
                 }
@@ -512,13 +679,22 @@
 
             scroll.Content = grid;
 
-            if (tab.Name == "Materials")
+            if (tab.Name == "Food")
             {
-                MaterialsContent.Content = scroll;
-                return;
+                stackPanel.Children.Add(new TextBox 
+                                            {
+                                                Background = Brushes.Transparent,
+                                                BorderThickness = new Thickness(0),
+                                                Margin = new Thickness(10, 10, 0, 0),
+                                                IsReadOnly = true,
+                                                TextWrapping = TextWrapping.Wrap,
+                                                Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
+                                            });
             }
 
-            tab.Content = scroll;
+            stackPanel.Children.Add(scroll);
+
+            tab.Content = stackPanel;
         }
 
         private void DebugData()
@@ -724,6 +900,10 @@
                 this.Disconnect.IsEnabled = !this.connected;
                 this.Disconnect.Visibility = Visibility.Hidden;
                 this.IpAddress.IsEnabled = this.connected;
+
+                TabControl.IsEnabled = false;
+                this.Save.IsEnabled = false;
+                this.Refresh.IsEnabled = false;
             }
 
             if (state == "Load")

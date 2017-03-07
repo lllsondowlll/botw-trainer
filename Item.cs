@@ -15,7 +15,7 @@
         {
             get
             {
-                return this.Address.ToString("X");
+                return this.Address.ToString("x8").ToUpper();
             }
         }
 
@@ -25,7 +25,7 @@
         {
             get
             {
-                return this.Value.ToString("X");
+                return this.Value.ToString("x8").ToUpper();
             }
         }
 
@@ -37,7 +37,7 @@
             {
                 try
                 {
-                    var val = BitConverter.GetBytes(this.Equipped).Reverse().First().ToString("X");
+                    var val = BitConverter.GetBytes(this.Equipped).Reverse().First().ToString("x8");
                     return val != "0";
                 }
                 catch
@@ -48,23 +48,53 @@
             }
         }
 
-        public uint ModType { get; set; }
+        public uint Modifier1 { get; set; }
 
-        public string ModTypeHex
+        public string Modifier1Hex
         {
             get
             {
-                return this.ModType.ToString("X");
+                return this.Modifier1.ToString("x8").ToUpper();
             }
         }
 
-        public uint ModAmount { get; set; }
+        public uint Modifier2 { get; set; }
 
-        public string ModAmountHex
+        public string Modifier2Hex
         {
             get
             {
-                return this.ModAmount.ToString("X");
+                return this.Modifier2.ToString("x8").ToUpper();
+            }
+        }
+
+        public uint Modifier3 { get; set; }
+
+        public string Modifier3Hex
+        {
+            get
+            {
+                return this.Modifier3.ToString("x8").ToUpper();
+            }
+        }
+
+        public uint Modifier4 { get; set; }
+
+        public string Modifier4Hex
+        {
+            get
+            {
+                return this.Modifier4.ToString("x8").ToUpper();
+            }
+        }
+
+        public uint Modifier5 { get; set; }
+
+        public string Modifier5Hex
+        {
+            get
+            {
+                return this.Modifier5.ToString("x8").ToUpper();
             }
         }
 
@@ -73,3 +103,16 @@
         public int Unknown { get; set; }
     }
 }
+
+/*X00000YY
+X = Modifier Level (0 = Level 1, 8 = Level 2)
+YY = Modifier Type
+--
+01 = Attack Up
+02 = Durability Up
+04 = Critical Hit
+08 = Long Throw
+10 = Five-Shot Burst
+20 = Zoom x3
+40 = Quick Shot
+80 = Shield Surf Up*/
