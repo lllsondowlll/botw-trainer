@@ -43,24 +43,24 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotwTrainer.exe" size="638400">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotwTrainer.exe" size="638912">
       <assemblyIdentity name="BotwTrainer" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>ub8V6Pkvj/8pNQNOnU+qw9SIrseYTJFD11Xmt06kIq0=</dsig:DigestValue>
+        <dsig:DigestValue>xhZ/HI3BCJpwxqIhSiECf7Ot29ruDs6FDixG8FO7CZc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="BotwTrainer.exe.config" size="1121">
+  <file name="BotwTrainer.exe.config" size="1119">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>bYcWWIGLCylz69vxa3JedS65j6W3uTEV1Wh/ITvwHjo=</dsig:DigestValue>
+      <dsig:DigestValue>9tt63AKU1NGZsJKWPDO1hP62STTa2KdrL6cJkZ0m7u0=</dsig:DigestValue>
     </hash>
   </file>
   <file name="icon.ico" size="193310">

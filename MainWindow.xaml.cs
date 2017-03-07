@@ -74,7 +74,8 @@
             MoonJump = 4,
             WeaponInv = 5,
             BowInv = 6,
-            ShieldInv = 7
+            ShieldInv = 7,
+            Speed = 8
         }
 
         private void ConnectClick(object sender, RoutedEventArgs e)
@@ -143,6 +144,7 @@
                 this.LoadTab(this.KeyItems, 9);
 
                 CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
+                CurrentSpeed.Text = this.tcpGecko.peek(0x439BF514).ToString("X");
                 CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
                 CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
 
@@ -361,6 +363,11 @@
                 if (Run.IsChecked == true)
                 {
                     selected.Add(Cheat.Run);
+                }
+
+                if (Speed.IsChecked == true)
+                {
+                    selected.Add(Cheat.Speed);
                 }
 
                 if (MoonJump.IsChecked == true)
@@ -764,6 +771,9 @@
             var run = this.tcpGecko.peek(0x43A88CC4).ToString("X");
             this.RunData.Content = string.Format("0x43A88CC4 = {0}", run);
 
+            var speed = this.tcpGecko.peek(0x439BF514).ToString("X");
+            this.SpeedData.Content = string.Format("0x439BF514 = {0}", speed);
+
             var rupee1 = this.tcpGecko.peek(0x3FC92D10);
             var rupee2 = this.tcpGecko.peek(0x4010AA0C);
             this.RupeeData.Content = string.Format("[0x3FC92D10 = {0}, 0x4010AA0C = {1}]", rupee1, rupee2);
@@ -829,6 +839,16 @@
                 codes.Add(0x00020000);
                 codes.Add(0x43A88CC4);
                 codes.Add(0x3FC00000);
+                codes.Add(0x00000000);
+            }
+
+            if (cheats.Contains(Cheat.Speed))
+            {
+                var value = uint.Parse(CurrentSpeed.Text, NumberStyles.HexNumber);
+
+                codes.Add(0x00020000);
+                codes.Add(0x439BF514);
+                codes.Add(value);
                 codes.Add(0x00000000);
             }
 
