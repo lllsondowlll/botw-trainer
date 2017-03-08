@@ -439,7 +439,7 @@
         {
             var scroll = new ScrollViewer { Name = "ScrollContent", Margin = new Thickness(10), VerticalAlignment = VerticalAlignment.Top };
 
-            var stackPanel = new StackPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
+            var holder = new WrapPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
 
             // setup grid
             var grid = this.GenerateTabGrid();
@@ -504,11 +504,11 @@
                 x++;
             }
 
-            grid.Height = x * 34;
+            grid.Height = x * 35;
 
             if (tab.Name == "Food")
             {
-                stackPanel.Children.Add(new TextBox 
+                holder.Children.Add(new TextBox 
                                             {
                                                 Background = Brushes.Transparent,
                                                 BorderThickness = new Thickness(0),
@@ -519,9 +519,9 @@
                                             });
             }
 
-            stackPanel.Children.Add(grid);
+            holder.Children.Add(grid);
 
-            scroll.Content = stackPanel;
+            scroll.Content = holder;
 
             tab.Content = scroll;
         }
@@ -530,8 +530,6 @@
         {
             // Debug Grid data
             DebugGrid.ItemsSource = this.items;
-
-            DebugIntro.Content = string.Format("Showing {0} items", this.items.Count);
 
             // Show extra info in 'Codes' tab to see if our cheats are looking in the correct place
             var stamina1 = this.tcpGecko.peek(0x42439594).ToString("X");
