@@ -143,7 +143,7 @@
                     x++;
                 }
 
-                this.itemsFound = x;
+                this.itemsFound = this.items.Count;
 
                 return true;
             }
@@ -468,8 +468,9 @@
                     Text = item.Name,
                     ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
                     //ToolTip = item.Address.ToString("x8").ToUpper(), 
-                    Margin = new Thickness(0),
-                    Height = 26
+                    Margin = new Thickness(0,0,10,0),
+                    Height = 22,
+                    Width = 250
                 };
 
                 Grid.SetRow(name, x);
@@ -509,14 +510,14 @@
             if (tab.Name == "Food")
             {
                 holder.Children.Add(new TextBox 
-                                            {
-                                                Background = Brushes.Transparent,
-                                                BorderThickness = new Thickness(0),
-                                                Margin = new Thickness(10, 10, 0, 0),
-                                                IsReadOnly = true,
-                                                TextWrapping = TextWrapping.Wrap,
-                                                Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
-                                            });
+                {
+                    Background = Brushes.Transparent,
+                    BorderThickness = new Thickness(0),
+                    Margin = new Thickness(10, 10, 0, 0),
+                    IsReadOnly = true,
+                    TextWrapping = TextWrapping.Wrap,
+                    Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
+                });
             }
 
             holder.Children.Add(grid);
@@ -890,8 +891,8 @@
                 Text = value,
                 ToolTip = field,
                 Width = 70,
-                Height = 26,
-                Margin = new Thickness(0),
+                Height = 22,
+                Margin = new Thickness(10,0,10,0),
                 Name = "Item_" + field,
                 IsEnabled = true,
                 CharacterCasing = CharacterCasing.Upper,
@@ -916,8 +917,8 @@
         {
             var grid = new Grid
             {
-                Name = "PanelContent",
-                Margin = new Thickness(0),
+                Name = "TabGrid",
+                Margin = new Thickness(10),
                 ShowGridLines = false,
                 VerticalAlignment = VerticalAlignment.Top
             };

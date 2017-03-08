@@ -62,6 +62,7 @@
             {
                 if (this.client == null)
                 {
+                    return;
                     throw new IOException("Not connected.", new NullReferenceException());
                 }
 
