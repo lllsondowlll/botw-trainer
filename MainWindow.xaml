@@ -24,7 +24,7 @@
             <Button x:Name="Load" Content="Load Data" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="250" Canvas.Top="13" IsEnabled="False" />
         </Canvas>
 
-        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" VerticalAlignment="Top" IsEnabled="True" Grid.Row="1" SelectedIndex="0" Width="960" SelectionChanged="TabControlSelectionChanged">
+        <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="960" SelectionChanged="TabControlSelectionChanged">
 
             <TabItem Header="Weapons" x:Name="Weapons" Margin="0,0,0,0" Background="CadetBlue"/>
 
@@ -100,7 +100,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Address" Width="80" Binding="{Binding BaseAddressHex, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding Page}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding PageName, Mode=OneWay}"></DataGridTextColumn>
                             <DataGridTextColumn Header="?" Width="25" Binding="{Binding Unknown}"></DataGridTextColumn>
                             <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"></DataGridTextColumn>
                             <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"></DataGridCheckBoxColumn>

@@ -105,7 +105,53 @@
 
         public int Page { get; set; }
 
+        public string PageName
+        {
+            get
+            {
+                var name = string.Empty;
+                switch (this.Page)
+                {
+                    case 0:
+                        name = "Weapons";
+                        break;
+                    case 1:
+                        name = "Bows";
+                        break;
+                    case 2:
+                        name = "Arrows";
+                        break;
+                    case 3:
+                        name = "Shields";
+                        break;
+                    case 4:
+                        name = "Head";
+                        break;
+                    case 5:
+                        name = "Torso";
+                        break;
+                    case 6:
+                        name = "Legs";
+                        break;
+                    case 7:
+                        name = "Materials";
+                        break;
+                    case 8:
+                        name = "Food";
+                        break;
+                    case 9:
+                        name = "Key Items";
+                        break;
+                }
+
+                return name;
+            }
+        }
+
         public int Unknown { get; set; }
+
+
+
     }
 }
 

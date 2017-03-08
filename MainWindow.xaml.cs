@@ -866,9 +866,16 @@
                 Load.IsEnabled = this.connected;
                 this.Connect.IsEnabled = !this.connected;
                 this.Connect.Visibility = Visibility.Hidden;
+
                 this.Disconnect.IsEnabled = this.connected;
                 this.Disconnect.Visibility = Visibility.Visible;
+
                 this.IpAddress.IsEnabled = !this.connected;
+
+                if (this.Load.Visibility == Visibility.Hidden)
+                {
+                    this.Refresh.IsEnabled = true;
+                }
             }
 
             if (state == "Disconnected")
