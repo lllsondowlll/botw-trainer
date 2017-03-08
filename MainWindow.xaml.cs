@@ -27,9 +27,7 @@
         // Technically your first item as they are stored in reverse so we work backwards
         private const uint ItemEnd = 0x43CA2AEC;
 
-        // 0x140 (320) is the amount of items to search for in memory. Over estimating at this point.
-        // We start at the end and go back in jumps of 0x220 getting data 320 times
-        private const uint ItemStart = 0x43C6B2AC; // ItemEnd - (0x140 * 0x220);
+        private const uint ItemStart = 0x43C6B2AC;
 
         private const uint CodeHandlerStart = 0x01133000;
 
@@ -74,6 +72,123 @@
             BowInv = 6,
             ShieldInv = 7,
             Speed = 8
+        }
+
+        private bool LoadDataAsync()
+        {
+            try
+            {
+                var x = 0;
+
+                var currentItem = ItemEnd;
+
+                while (currentItem >= ItemStart)
+                {
+                    // Skip FFFFFFFF invalild items. Usuauly end of the list
+                    var page = this.tcpGecko.peek(currentItem);
+                    if (page > 9)
+                    {
+                        var percent = (100m / 418m) * x;
+                        Dispatcher.Invoke(
+                            () =>
+                                {
+                                    ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                                    this.UpdateProgress(Convert.ToInt32(percent));
+                                });
+
+                        currentItem -= 0x220;
+                        x++;
+
+                        continue;
+                    }
+
+                    // TODO: Implement the following
+                    /*
+                    var stream = new MemoryStream();
+                    this.tcpGecko.Dump(currentItem, currentItem + 0x70, stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    var buffer = new byte[4];
+                    stream.Read(buffer, 0, 4);
+                    var baseAddress = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
+                    */
+
+                    var item = new Item
+                    {
+                        BaseAddress = currentItem,
+                        Page = Convert.ToInt32(page),
+                        Unknown = Convert.ToInt32(this.tcpGecko.peek(currentItem + 0x4)),
+                        Value = this.tcpGecko.peek(currentItem + 0x8),
+                        Equipped = this.tcpGecko.peek(currentItem + 0xC),
+                        NameStart = this.tcpGecko.peek(currentItem + 0x1C),
+                        Name = this.ReadString(currentItem + 0x1C),
+                        Modifier1Value = this.tcpGecko.peek(currentItem + 0x5C).ToString("x8").ToUpper(),
+                        Modifier2Value = this.tcpGecko.peek(currentItem + 0x60).ToString("x8").ToUpper(),
+                        Modifier3Value = this.tcpGecko.peek(currentItem + 0x64).ToString("x8").ToUpper(),
+                        Modifier4Value = this.tcpGecko.peek(currentItem + 0x68).ToString("x8").ToUpper(),
+                        Modifier5Value = this.tcpGecko.peek(currentItem + 0x6C).ToString("x8").ToUpper()
+                    };
+
+                    this.items.Add(item);
+
+                    var currentPercent = (100m / 418m) * x;
+                    Dispatcher.Invoke(
+                        () =>
+                            {
+                                ProgressText.Text = string.Format("{0}/{1}", x, 418);
+                                this.UpdateProgress(Convert.ToInt32(currentPercent));
+                            });
+
+                    currentItem -= 0x220;
+                    x++;
+                }
+
+                this.itemsFound = x;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                Dispatcher.Invoke(() => this.ToggleControls("LoadError"));
+                return false;
+            }
+        }
+
+        private async void LoadClick(object sender, RoutedEventArgs e)
+        {
+            this.ToggleControls("Load");
+
+            this.items.Clear();
+
+            var result = await Task.Run(() => this.LoadDataAsync());
+
+            if (result)
+            {
+                this.DebugData();
+
+                this.LoadTab(this.Weapons, 0);
+                this.LoadTab(this.Bows, 1);
+                this.LoadTab(this.Arrows, 2);
+                this.LoadTab(this.Shields, 3);
+                this.LoadTab(this.Armour, 4);
+                this.LoadTab(this.Materials, 7);
+                this.LoadTab(this.Food, 8);
+                this.LoadTab(this.KeyItems, 9);
+
+                // Code Tab Values
+                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
+                CurrentSpeed.Text = this.tcpGecko.peek(0x439BF514).ToString("X");
+                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
+                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
+
+                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
+                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
+                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
+
+                this.Notification.Content = string.Format("Items found: {0}", this.itemsFound);
+
+                this.ToggleControls("DataLoaded");
+            }
         }
 
         private void ConnectClick(object sender, RoutedEventArgs e)
@@ -315,140 +430,9 @@
             }
         }
 
-        private void FindAndPoke(string itemAddress, uint address)
-        {
-            var foundTextBox = (TextBox)this.FindName("Item_" + itemAddress);
-            if (foundTextBox != null)
-            {
-                uint val;
-                bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
-                if (parsed)
-                {
-                    this.tcpGecko.poke32(address, val);
-                }
-            }
-        }
-
         private void ExportClick(object sender, RoutedEventArgs e)
         {
             this.ExportToExcel();
-        }
-
-        private async void LoadClick(object sender, RoutedEventArgs e)
-        {
-            this.ToggleControls("Load");
-
-            this.items.Clear();
-
-            var result = await Task.Run(() => this.LoadDataAsync());
-
-            if (result)
-            {
-                this.DebugData();
-
-                this.LoadTab(this.Weapons, 0);
-                this.LoadTab(this.Bows, 1);
-                this.LoadTab(this.Arrows, 2);
-                this.LoadTab(this.Shields, 3);
-                this.LoadTab(this.Armour, 4);
-                this.LoadTab(this.Materials, 7);
-                this.LoadTab(this.Food, 8);
-                this.LoadTab(this.KeyItems, 9);
-
-                // Code Tab Values
-                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
-                CurrentSpeed.Text = this.tcpGecko.peek(0x439BF514).ToString("X");
-                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
-                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
-
-                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
-                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
-                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
-
-                MessageBox.Show("Data transfer complete");
-
-                this.ToggleControls("DataLoaded");
-            }
-        }
-
-        private bool LoadDataAsync()
-        {
-            try
-            {
-                var x = 0;
-
-                var currentItem = ItemEnd;
-
-                while (currentItem >= ItemStart)
-                {
-                    // Skip FFFFFFFF invalild items
-                    var page = this.tcpGecko.peek(currentItem);
-                    if (page > 9)
-                    {
-                        Dispatcher.Invoke(
-                            () =>
-                            {
-                                ProgressText.Text = string.Format("{0}/{1}", x, 418);
-                            });
-
-                        var percent = (100m / 418m) * x;
-                        Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(percent)));
-
-                        currentItem -= 0x220;
-                        x++;
-
-                        continue;
-                    }
-
-                    var stream = new MemoryStream();
-                    this.tcpGecko.Dump(currentItem, currentItem + 0x70, stream);
-                    stream.Seek(0, SeekOrigin.Begin);
-
-                    var buffer = new byte[4];
-                    stream.Read(buffer, 0, 4);
-                    var baseAddress = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
-                    
-                    var item = new Item
-                                   {
-                                       BaseAddress = baseAddress,
-                                       Page = Convert.ToInt32(page),
-                                       Unknown = Convert.ToInt32(this.tcpGecko.peek(currentItem + 0x4)),
-                                       Value = this.tcpGecko.peek(currentItem + 0x8),
-                                       Equipped = this.tcpGecko.peek(currentItem + 0xC),
-                                       NameStart = this.tcpGecko.peek(currentItem + 0x1C),
-                                       Name = this.ReadString(currentItem + 0x1C),
-                                       Modifier1Value = this.tcpGecko.peek(currentItem + 0x5C).ToString("x8").ToUpper(),
-                                       Modifier2Value = this.tcpGecko.peek(currentItem + 0x60).ToString("x8").ToUpper(),
-                                       Modifier3Value = this.tcpGecko.peek(currentItem + 0x64).ToString("x8").ToUpper(),
-                                       Modifier4Value = this.tcpGecko.peek(currentItem + 0x68).ToString("x8").ToUpper(),
-                                       Modifier5Value = this.tcpGecko.peek(currentItem + 0x6C).ToString("x8").ToUpper()
-                                   };
-
-                    this.items.Add(item);
-
-                    Dispatcher.Invoke(
-                        () =>
-                        {
-                            ProgressText.Text = string.Format("{0}/{1}", x, 418);
-                        });
-
-                    var currentPercent = (100m / 418m) * x;
-                    Dispatcher.Invoke(() => this.UpdateProgress(Convert.ToInt32(currentPercent)));
-
-                    currentItem -= 0x220;
-                    x++;
-                }
-
-                this.itemsFound = x;
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.Invoke(
-                    () => this.ToggleControls("LoadError"));
-                return false;
-            }
         }
 
         private void LoadTab(ContentControl tab, int page)
@@ -485,7 +469,7 @@
                     ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
                     //ToolTip = item.Address.ToString("x8").ToUpper(), 
                     Margin = new Thickness(0),
-                    Height = 22
+                    Height = 26
                 };
 
                 Grid.SetRow(name, x);
@@ -493,28 +477,28 @@
                 grid.Children.Add(name);
 
                 // Value
-                var val = this.GenerateGridTb(value.ToString(), item.Modifier5Address, x, 1);
+                var val = this.GenerateGridTextBox(value.ToString(), item.Modifier5Address, x, 1);
                 val.PreviewTextInput += this.NumberValidationTextBox;
                 grid.Children.Add(val);
 
                 // Mod1
-                var mtb1 = this.GenerateGridTb(item.Modifier1Value, item.Modifier1Address, x, 2);
+                var mtb1 = this.GenerateGridTextBox(item.Modifier1Value, item.Modifier1Address, x, 2);
                 grid.Children.Add(mtb1);
 
                 // Mod2
-                var mtb2 = this.GenerateGridTb(item.Modifier2Value, item.Modifier2Address, x, 3);
+                var mtb2 = this.GenerateGridTextBox(item.Modifier2Value, item.Modifier2Address, x, 3);
                 grid.Children.Add(mtb2);
 
                 // Mod3
-                var mtb3 = this.GenerateGridTb(item.Modifier3Value, item.Modifier3Address, x, 4);
+                var mtb3 = this.GenerateGridTextBox(item.Modifier3Value, item.Modifier3Address, x, 4);
                 grid.Children.Add(mtb3);
 
                 // Mod4
-                var mtb4 = this.GenerateGridTb(item.Modifier4Value, item.Modifier4Address, x, 5);
+                var mtb4 = this.GenerateGridTextBox(item.Modifier4Value, item.Modifier4Address, x, 5);
                 grid.Children.Add(mtb4);
 
                 // Mod5
-                var mtb5 = this.GenerateGridTb(item.Modifier5Value, item.Modifier5Address, x, 6);
+                var mtb5 = this.GenerateGridTextBox(item.Modifier5Value, item.Modifier5Address, x, 6);
                 grid.Children.Add(mtb5);
 
                 x++;
@@ -540,95 +524,6 @@
             scroll.Content = stackPanel;
 
             tab.Content = scroll;
-        }
-
-        private TextBox GenerateGridTb(string value, string field, int x, int col)
-        {
-            var tb = new TextBox
-            {
-                Text = value,
-                ToolTip = field,
-                Width = 70,
-                Height = 26,
-                Margin = new Thickness(0),
-                Name = "Item_" + field,
-                IsEnabled = true,
-                CharacterCasing = CharacterCasing.Upper,
-                MaxLength = 8
-            };
-
-            var check2 = (TextBox)this.FindName("Item_" + field);
-            if (check2 != null)
-            {
-                this.UnregisterName("Item_" + field);
-            }
-
-            this.RegisterName("Item_" + field, tb);
-
-            Grid.SetRow(tb, x);
-            Grid.SetColumn(tb, col);
-
-            return tb;
-        }
-
-        private Grid GenerateTabGrid()
-        {
-            var grid = new Grid
-            {
-                Name = "PanelContent",
-                Margin = new Thickness(0),
-                ShowGridLines = false,
-                VerticalAlignment = VerticalAlignment.Top
-            };
-
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            grid.RowDefinitions.Add(new RowDefinition());
-
-            // Headers
-            var itemHeader = new TextBlock
-            {
-                Text = "Item Name",
-                FontSize = 14,
-                FontWeight = FontWeights.Bold
-            };
-            Grid.SetRow(itemHeader, 0);
-            Grid.SetColumn(itemHeader, 0);
-            grid.Children.Add(itemHeader);
-
-            var valueHeader = new TextBlock
-            {
-                Text = "Item Value",
-                FontSize = 14,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            Grid.SetRow(valueHeader, 0);
-            Grid.SetColumn(valueHeader, 1);
-            grid.Children.Add(valueHeader);
-
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            for (int y = 1; y < 6; y++)
-            {
-                var header = new TextBlock
-                {
-                    Text = "Modifier " + y,
-                    FontSize = 14,
-                    FontWeight = FontWeights.Bold,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                };
-                Grid.SetRow(header, 0);
-                Grid.SetColumn(header, y + 1);
-                grid.Children.Add(header);
-            }
-
-            return grid;
         }
 
         private void DebugData()
@@ -669,7 +564,7 @@
             this.ShieldSlotsData.Content = string.Format("[0x3FCC0B40 = {0}, 0x4011128C = {1}]", shield1, shield2);
         }
 
-        private void SetCheats(List<Cheat> cheats)
+        private void SetCheats(ICollection<Cheat> cheats)
         {
             // Disable codehandler before we modify
             this.tcpGecko.poke32(CodeHandlerEnabled, 0x00000000);
@@ -916,7 +811,7 @@
                     MessageBox.Show(string.Format("An update is available: {0}", result));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Error checking for new version");
             }
@@ -925,6 +820,43 @@
         private void UpdateProgress(int percent)
         {
             Progress.Value = percent;
+        }
+
+        private void ExportToExcel()
+        {
+            try
+            {
+                DebugGrid.SelectAllCells();
+                DebugGrid.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                ApplicationCommands.Copy.Execute(null, DebugGrid);
+                var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+                DebugGrid.UnselectAllCells();
+
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var excelFile = new StreamWriter(path + @"\debug.csv");
+                excelFile.WriteLine(result);
+                excelFile.Close();
+
+                MessageBox.Show("File exported to " + path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void FindAndPoke(string itemAddress, uint address)
+        {
+            var foundTextBox = (TextBox)this.FindName("Item_" + itemAddress);
+            if (foundTextBox != null)
+            {
+                uint val;
+                bool parsed = uint.TryParse(foundTextBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out val);
+                if (parsed)
+                {
+                    this.tcpGecko.poke32(address, val);
+                }
+            }
         }
 
         private string ReadString(uint addr)
@@ -953,27 +885,93 @@
             return name;
         }
 
-        private void ExportToExcel()
+        private TextBox GenerateGridTextBox(string value, string field, int x, int col)
         {
-            try
+            var tb = new TextBox
             {
-                DebugGrid.SelectAllCells();
-                DebugGrid.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
-                ApplicationCommands.Copy.Execute(null, DebugGrid);
-                var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
-                DebugGrid.UnselectAllCells();
+                Text = value,
+                ToolTip = field,
+                Width = 70,
+                Height = 26,
+                Margin = new Thickness(0),
+                Name = "Item_" + field,
+                IsEnabled = true,
+                CharacterCasing = CharacterCasing.Upper,
+                MaxLength = 8
+            };
 
-                var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                var excelFile = new StreamWriter(path + @"\debug.csv");
-                excelFile.WriteLine(result);
-                excelFile.Close();
-
-                MessageBox.Show("File exported to " + path);
-            }
-            catch (Exception ex)
+            var check = (TextBox)this.FindName("Item_" + field);
+            if (check != null)
             {
-                MessageBox.Show(ex.ToString());
+                this.UnregisterName("Item_" + field);
             }
+
+            this.RegisterName("Item_" + field, tb);
+
+            Grid.SetRow(tb, x);
+            Grid.SetColumn(tb, col);
+
+            return tb;
+        }
+
+        private Grid GenerateTabGrid()
+        {
+            var grid = new Grid
+            {
+                Name = "PanelContent",
+                Margin = new Thickness(0),
+                ShowGridLines = false,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            grid.RowDefinitions.Add(new RowDefinition());
+
+            // Headers
+            var itemHeader = new TextBlock
+            {
+                Text = "Item Name",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold
+            };
+            Grid.SetRow(itemHeader, 0);
+            Grid.SetColumn(itemHeader, 0);
+            grid.Children.Add(itemHeader);
+
+            var valueHeader = new TextBlock
+            {
+                Text = "Item Value",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            Grid.SetRow(valueHeader, 0);
+            Grid.SetColumn(valueHeader, 1);
+            grid.Children.Add(valueHeader);
+
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            for (int y = 1; y < 6; y++)
+            {
+                var header = new TextBlock
+                {
+                    Text = "Modifier " + y,
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                Grid.SetRow(header, 0);
+                Grid.SetColumn(header, y + 1);
+                grid.Children.Add(header);
+            }
+
+            return grid;
         }
     }
 }

@@ -22,6 +22,8 @@
             <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="DisconnectClick" IsEnabled="False" Canvas.Left="140" Canvas.Top="13" Visibility="Hidden"/>
 
             <Button x:Name="Load" Content="Load Data" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="LoadClick" Canvas.Left="250" Canvas.Top="13" IsEnabled="False" />
+            
+            <Label x:Name="Notification" Content="Label" Canvas.Right="10" Canvas.Top="13" Width="450" HorizontalContentAlignment="Right"/>
         </Canvas>
 
         <TabControl x:Name="TabControl" HorizontalAlignment="Left" Height="530" VerticalAlignment="Top" IsEnabled="False" Grid.Row="1" SelectedIndex="0" Width="960" SelectionChanged="TabControlSelectionChanged">
