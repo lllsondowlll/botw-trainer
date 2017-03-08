@@ -98,17 +98,17 @@
 
                     <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0" ClipboardCopyMode="IncludeHeader">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Address" Width="80" Binding="{Binding BaseAddressHex, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding PageName, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="?" Width="25" Binding="{Binding Unknown}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"></DataGridTextColumn>
-                            <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"></DataGridCheckBoxColumn>
-                            <DataGridTextColumn Header="Modifier1" Width="75" Binding="{Binding Modifier1Address, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Modifier2" Width="75" Binding="{Binding Modifier2Address, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Modifier3" Width="75" Binding="{Binding Modifier3Address, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Modifier4" Width="75" Binding="{Binding Modifier4Address, Mode=OneWay}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Modifier5" Width="75" Binding="{Binding Modifier5Address, Mode=OneWay}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Address" Width="80" Binding="{Binding BaseAddressHex, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding PageName, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="?" Width="25" Binding="{Binding Unknown}"/>
+                            <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"/>
+                            <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Modifier1" Width="75" Binding="{Binding Modifier1Address, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Modifier2" Width="75" Binding="{Binding Modifier2Address, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Modifier3" Width="75" Binding="{Binding Modifier3Address, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Modifier4" Width="75" Binding="{Binding Modifier4Address, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Modifier5" Width="75" Binding="{Binding Modifier5Address, Mode=OneWay}"/>
                         </DataGrid.Columns>
                     </DataGrid>
 

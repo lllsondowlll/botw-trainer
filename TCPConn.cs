@@ -18,9 +18,9 @@
             this.stream = null;
         }
 
-        public string Host { get; private set; }
+        private string Host { get; set; }
 
-        public int Port { get; private set; }
+        private int Port { get; set; }
 
         public void Connect()
         {
@@ -67,24 +67,10 @@
 
                 this.client.Close();
             }
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.Message);
-            }
             finally
             {
                 this.client = null;
             }
-        }
-
-        public void Purge()
-        {
-            if (this.stream == null)
-            {
-                throw new IOException("Not connected.", new NullReferenceException());
-            }
-
-            this.stream.Flush();
         }
 
         public void Read(byte[] buffer, uint nobytes, ref uint bytesRead)
