@@ -122,42 +122,6 @@
             }
         }
 
-        private async void LoadClick(object sender, RoutedEventArgs e)
-        {
-            this.ToggleControls("Load");
-
-            this.items.Clear();
-
-            var result = await Task.Run(() => this.LoadDataAsync());
-
-            if (result)
-            {
-                this.DebugData();
-
-                this.LoadTab(this.Weapons, 0);
-                this.LoadTab(this.Bows, 1);
-                this.LoadTab(this.Arrows, 2);
-                this.LoadTab(this.Shields, 3);
-                this.LoadTab(this.Armour, 4);
-                this.LoadTab(this.Materials, 7);
-                this.LoadTab(this.Food, 8);
-                this.LoadTab(this.KeyItems, 9);
-
-                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
-                CurrentSpeed.Text = this.tcpGecko.peek(0x439BF514).ToString("X");
-                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
-                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
-
-                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
-                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
-                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
-
-                MessageBox.Show("Data transfer complete");
-
-                this.ToggleControls("DataLoaded");
-            }
-        }
-
         private void SaveClick(object sender, RoutedEventArgs e)
         {
             // Grab the values from the relevant tab and poke them back to memory
@@ -394,15 +358,49 @@
             }
         }
 
+        private void ExportClick(object sender, RoutedEventArgs e)
+        {
+            this.ExportToExcel();
+        }
+
+        private async void LoadClick(object sender, RoutedEventArgs e)
+        {
+            this.ToggleControls("Load");
+
+            this.items.Clear();
+
+            var result = await Task.Run(() => this.LoadDataAsync());
+
+            if (result)
+            {
+                this.DebugData();
+
+                this.LoadTab(this.Weapons, 0);
+                this.LoadTab(this.Bows, 1);
+                this.LoadTab(this.Arrows, 2);
+                this.LoadTab(this.Shields, 3);
+                this.LoadTab(this.Armour, 4);
+                this.LoadTab(this.Materials, 7);
+                this.LoadTab(this.Food, 8);
+                this.LoadTab(this.KeyItems, 9);
+
+                CurrentStamina.Text = this.tcpGecko.peek(0x42439598).ToString("X");
+                CurrentSpeed.Text = this.tcpGecko.peek(0x439BF514).ToString("X");
+                CurrentHealth.Text = this.tcpGecko.peek(0x439B6558).ToString(CultureInfo.InvariantCulture);
+                CurrentRupees.Text = this.tcpGecko.peek(0x4010AA0C).ToString(CultureInfo.InvariantCulture);
+
+                CurrentWeaponSlots.Text = this.tcpGecko.peek(0x3FCFB498).ToString(CultureInfo.InvariantCulture);
+                CurrentBowSlots.Text = this.tcpGecko.peek(0x3FD4BB50).ToString(CultureInfo.InvariantCulture);
+                CurrentShieldSlots.Text = this.tcpGecko.peek(0x3FCC0B40).ToString(CultureInfo.InvariantCulture);
+
+                MessageBox.Show("Data transfer complete");
+
+                this.ToggleControls("DataLoaded");
+            }
+        }
+
         private bool LoadDataAsync()
         {
-            // TODO: Dump the entire item block instead of peeking
-            /*
-            var dump = new MemoryStream();
-            this.tcpGecko.Dump(ItemStart, ItemEnd, dump);
-            dump.Position = 0;
-            */
-
             try
             {
                 var x = 0;
@@ -435,6 +433,13 @@
                     {
                         page = 4;
                     }
+
+                    /*
+                    TODO: Dump the entire item block instead of peeking
+                    var dump = new MemoryStream();
+                    this.tcpGecko.Dump(currentItem, currentItem + 0x6C, dump);
+                    dump.Position = 0;
+                    */
 
                     var item = new Item
                                    {
@@ -485,14 +490,129 @@
             var stackPanel = new StackPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
 
             // setup grid
+            var grid = this.GenerateTabGrid();
+
+            var x = 1;
+            var list = this.items.Where(i => i.Page == page).OrderBy(i => i.BaseAddress);
+
+            if (this.itemOrderDescending)
+            {
+                list = list.OrderByDescending(i => i.BaseAddress);
+            }
+
+            foreach (var item in list)
+            {
+                grid.RowDefinitions.Add(new RowDefinition());
+
+                var value = item.Value;
+                if (value > int.MaxValue)
+                {
+                    value = 0;
+                }
+
+                // Name
+                var name = new TextBox
+                {
+                    Text = item.Name,
+                    ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
+                    //ToolTip = item.Address.ToString("x8").ToUpper(), 
+                    Margin = new Thickness(0),
+                    Height = 22
+                };
+
+                Grid.SetRow(name, x);
+                Grid.SetColumn(name, 0);
+                grid.Children.Add(name);
+
+                // Value
+                var val = this.GenerateGridTb(value.ToString(), item.Modifier5Address, x, 1);
+                val.PreviewTextInput += this.NumberValidationTextBox;
+                grid.Children.Add(val);
+
+                // Mod1
+                var mtb1 = this.GenerateGridTb(item.Modifier1Value, item.Modifier1Address, x, 2);
+                grid.Children.Add(mtb1);
+
+                // Mod2
+                var mtb2 = this.GenerateGridTb(item.Modifier2Value, item.Modifier2Address, x, 3);
+                grid.Children.Add(mtb2);
+
+                // Mod3
+                var mtb3 = this.GenerateGridTb(item.Modifier3Value, item.Modifier3Address, x, 4);
+                grid.Children.Add(mtb3);
+
+                // Mod4
+                var mtb4 = this.GenerateGridTb(item.Modifier4Value, item.Modifier4Address, x, 5);
+                grid.Children.Add(mtb4);
+
+                // Mod5
+                var mtb5 = this.GenerateGridTb(item.Modifier5Value, item.Modifier5Address, x, 6);
+                grid.Children.Add(mtb5);
+
+                x++;
+            }
+
+            grid.Height = x * 34;
+
+            if (tab.Name == "Food")
+            {
+                stackPanel.Children.Add(new TextBox 
+                                            {
+                                                Background = Brushes.Transparent,
+                                                BorderThickness = new Thickness(0),
+                                                Margin = new Thickness(10, 10, 0, 0),
+                                                IsReadOnly = true,
+                                                TextWrapping = TextWrapping.Wrap,
+                                                Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
+                                            });
+            }
+
+            stackPanel.Children.Add(grid);
+
+            scroll.Content = stackPanel;
+
+            tab.Content = scroll;
+        }
+
+        private TextBox GenerateGridTb(string value, string field, int x, int col)
+        {
+            var tb = new TextBox
+            {
+                Text = value,
+                ToolTip = field,
+                Width = 70,
+                Height = 26,
+                Margin = new Thickness(0),
+                Name = "Item_" + field,
+                IsEnabled = true,
+                CharacterCasing = CharacterCasing.Upper,
+                MaxLength = 8
+            };
+
+            var check2 = (TextBox)this.FindName("Item_" + field);
+            if (check2 != null)
+            {
+                this.UnregisterName("Item_" + field);
+            }
+
+            this.RegisterName("Item_" + field, tb);
+
+            Grid.SetRow(tb, x);
+            Grid.SetColumn(tb, col);
+
+            return tb;
+        }
+
+        private Grid GenerateTabGrid()
+        {
             var grid = new Grid
-                           {
-                               Name = "PanelContent",
-                               Margin = new Thickness(0),
-                               ShowGridLines = false,
-                               VerticalAlignment = VerticalAlignment.Top
-                           };
-            
+            {
+                Name = "PanelContent",
+                Margin = new Thickness(0),
+                ShowGridLines = false,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+
             grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -540,217 +660,7 @@
                 grid.Children.Add(header);
             }
 
-            var x = 1;
-            var list = this.items.Where(i => i.Page == page).OrderBy(i => i.BaseAddress);
-
-            if (this.itemOrderDescending)
-            {
-                list = list.OrderByDescending(i => i.BaseAddress);
-            }
-
-            foreach (var item in list)
-            {
-                grid.RowDefinitions.Add(new RowDefinition());
-
-                var value = item.Value;
-                if (value > int.MaxValue)
-                {
-                    value = 0;
-                }
-
-                var name = new TextBox
-                {
-                    Text = item.Name,
-                    ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
-                    //ToolTip = item.Address.ToString("x8").ToUpper(), 
-                    Margin = new Thickness(0),
-                    Height = 22
-                };
-
-                Grid.SetRow(name, x);
-                Grid.SetColumn(name, 0);
-                grid.Children.Add(name);
-
-                // Value
-                var tb = new TextBox
-                {
-                    Text = value.ToString(CultureInfo.InvariantCulture), 
-                    Width = 70, 
-                    Height = 22, 
-                    Margin = new Thickness(0), 
-                    Name = "Item_" + item.BaseAddressHex,
-                    IsEnabled = true
-                };
-
-                tb.PreviewTextInput += this.NumberValidationTextBox;
-
-                var check = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
-                if (check != null)
-                {
-                    this.UnregisterName("Item_" + item.BaseAddressHex);
-                }
-
-                this.RegisterName("Item_" + item.BaseAddressHex, tb);
-
-                Grid.SetRow(tb, x);
-                Grid.SetColumn(tb, 1);
-                grid.Children.Add(tb);
-
-
-                // Mod1
-                var tb1 = new TextBox
-                {
-                    Text = item.Modifier1Value,
-                    ToolTip = item.Modifier1Address,
-                    Width = 70,
-                    Height = 26,
-                    Margin = new Thickness(0),
-                    Name = "Item_" + item.Modifier1Address,
-                    IsEnabled = true,
-                    CharacterCasing = CharacterCasing.Upper,
-                    MaxLength = 8
-                };
-
-                var check1 = (TextBox)this.FindName("Item_" + item.Modifier1Address);
-                if (check1 != null)
-                {
-                    this.UnregisterName("Item_" + item.Modifier1Address);
-                }
-
-                this.RegisterName("Item_" + item.Modifier1Address, tb1);
-
-                Grid.SetRow(tb1, x);
-                Grid.SetColumn(tb1, 2);
-                grid.Children.Add(tb1);
-
-                // Mod2
-                var tb2 = new TextBox
-                {
-                    Text = item.Modifier2Value,
-                    ToolTip = item.Modifier2Address,
-                    Width = 70,
-                    Height = 26,
-                    Margin = new Thickness(0),
-                    Name = "Item_" + item.Modifier2Address,
-                    IsEnabled = true,
-                    CharacterCasing = CharacterCasing.Upper,
-                    MaxLength = 8
-                };
-
-                var check2 = (TextBox)this.FindName("Item_" + item.Modifier2Address);
-                if (check2 != null)
-                {
-                    this.UnregisterName("Item_" + item.Modifier2Address);
-                }
-
-                this.RegisterName("Item_" + item.Modifier2Address, tb2);
-
-                Grid.SetRow(tb2, x);
-                Grid.SetColumn(tb2, 3);
-                grid.Children.Add(tb2);
-
-                // Mod3
-                var tb3 = new TextBox
-                {
-                    Text = item.Modifier3Value,
-                    ToolTip = item.Modifier3Address,
-                    Width = 70,
-                    Height = 26,
-                    Margin = new Thickness(0),
-                    Name = "Item_" + item.Modifier3Address,
-                    IsEnabled = true,
-                    CharacterCasing = CharacterCasing.Upper,
-                    MaxLength = 8
-                };
-
-                var check3 = (TextBox)this.FindName("Item_" + item.Modifier3Address);
-                if (check3 != null)
-                {
-                    this.UnregisterName("Item_" + item.Modifier3Address);
-                }
-
-                this.RegisterName("Item_" + item.Modifier3Address, tb3);
-
-                Grid.SetRow(tb3, x);
-                Grid.SetColumn(tb3, 4);
-                grid.Children.Add(tb3);
-
-                // Mod4
-                var tb4 = new TextBox
-                {
-                    Text = item.Modifier4Value,
-                    ToolTip = item.Modifier4Address,
-                    Width = 70,
-                    Height = 26,
-                    Margin = new Thickness(0),
-                    Name = "Item_" + item.Modifier4Address,
-                    IsEnabled = true,
-                    CharacterCasing = CharacterCasing.Upper,
-                    MaxLength = 8
-                };
-
-                var check4 = (TextBox)this.FindName("Item_" + item.Modifier4Address);
-                if (check4 != null)
-                {
-                    this.UnregisterName("Item_" + item.Modifier4Address);
-                }
-
-                this.RegisterName("Item_" + item.Modifier4Address, tb4);
-
-                Grid.SetRow(tb4, x);
-                Grid.SetColumn(tb4, 5);
-                grid.Children.Add(tb4);
-
-                // Mod5
-                var tb5 = new TextBox
-                {
-                    Text = item.Modifier5Value,
-                    ToolTip = item.Modifier5Address,
-                    Width = 70,
-                    Height = 26,
-                    Margin = new Thickness(0),
-                    Name = "Item_" + item.Modifier5Address,
-                    IsEnabled = true,
-                    CharacterCasing = CharacterCasing.Upper,
-                    MaxLength = 8
-                };
-
-                var check5 = (TextBox)this.FindName("Item_" + item.Modifier5Address);
-                if (check5 != null)
-                {
-                    this.UnregisterName("Item_" + item.Modifier5Address);
-                }
-
-                this.RegisterName("Item_" + item.Modifier5Address, tb5);
-
-                Grid.SetRow(tb5, x);
-                Grid.SetColumn(tb5, 6);
-                grid.Children.Add(tb5);
-
-                x++;
-            }
-            
-
-            grid.Height = x * 34;
-
-            if (tab.Name == "Food")
-            {
-                stackPanel.Children.Add(new TextBox 
-                                            {
-                                                Background = Brushes.Transparent,
-                                                BorderThickness = new Thickness(0),
-                                                Margin = new Thickness(10, 10, 0, 0),
-                                                IsReadOnly = true,
-                                                TextWrapping = TextWrapping.Wrap,
-                                                Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
-                                            });
-            }
-
-            stackPanel.Children.Add(grid);
-
-            scroll.Content = stackPanel;
-
-            tab.Content = scroll;
+            return grid;
         }
 
         private void DebugData()
@@ -1064,6 +974,29 @@
             var name = builder.ToString();
 
             return name;
+        }
+
+        private void ExportToExcel()
+        {
+            try
+            {
+                DebugGrid.SelectAllCells();
+                DebugGrid.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                ApplicationCommands.Copy.Execute(null, DebugGrid);
+                var result = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+                DebugGrid.UnselectAllCells();
+
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var excelFile = new StreamWriter(path + @"\debug.csv");
+                excelFile.WriteLine(result);
+                excelFile.Close();
+
+                MessageBox.Show("File exported to " + path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }
