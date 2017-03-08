@@ -470,7 +470,9 @@
                     //ToolTip = item.Address.ToString("x8").ToUpper(), 
                     Margin = new Thickness(0,0,10,0),
                     Height = 22,
-                    Width = 250
+                    Width = 250,
+                    IsReadOnly = true,
+                    BorderThickness = new Thickness(0)
                 };
 
                 Grid.SetRow(name, x);
@@ -478,7 +480,7 @@
                 grid.Children.Add(name);
 
                 // Value
-                var val = this.GenerateGridTextBox(value.ToString(), item.Modifier5Address, x, 1);
+                var val = this.GenerateGridTextBox(value.ToString(), item.BaseAddressHex, x, 1);
                 val.PreviewTextInput += this.NumberValidationTextBox;
                 grid.Children.Add(val);
 
@@ -933,7 +935,8 @@
             {
                 Text = "Item Name",
                 FontSize = 14,
-                FontWeight = FontWeights.Bold
+                FontWeight = FontWeights.Bold,
+                Width = 250
             };
             Grid.SetRow(itemHeader, 0);
             Grid.SetColumn(itemHeader, 0);

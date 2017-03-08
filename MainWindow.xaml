@@ -96,11 +96,13 @@
             <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0" Background="SeaGreen">
                 <WrapPanel Margin="0">
 
-                    <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0" ClipboardCopyMode="IncludeHeader">
+                    <Button x:Name="Export" Content="Export" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" Width="75" Click="ExportClick" />
+
+                    <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0" ClipboardCopyMode="IncludeHeader" Width="920">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"/>
                             <DataGridTextColumn Header="Address" Width="80" Binding="{Binding BaseAddressHex, Mode=OneWay}"/>
-                            <DataGridTextColumn Header="Type" Width="40" Binding="{Binding PageName, Mode=OneWay}"/>
+                            <DataGridTextColumn Header="Type" Width="80" Binding="{Binding PageName, Mode=OneWay}"/>
                             <DataGridTextColumn Header="?" Width="25" Binding="{Binding Unknown}"/>
                             <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"/>
                             <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"/>
@@ -112,7 +114,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <Button x:Name="Export" Content="Export" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" Width="75" Click="ExportClick" />
+                    
 
                 </WrapPanel>
             </TabItem>
