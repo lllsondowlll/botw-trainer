@@ -49,7 +49,7 @@ namespace BotwTrainer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.9.6")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.9.7")]
         public string CurrentVersion {
             get {
                 return ((string)(this["CurrentVersion"]));

@@ -80,12 +80,12 @@
             {
                 var x = 0;
 
-                var currentItem = ItemEnd;
+                var currentItemAddress = ItemEnd;
 
-                while (currentItem >= ItemStart)
+                while (currentItemAddress >= ItemStart)
                 {
                     // Skip FFFFFFFF invalild items. Usuauly end of the list
-                    var page = this.tcpGecko.peek(currentItem);
+                    var page = this.tcpGecko.peek(currentItemAddress);
                     if (page > 9)
                     {
                         var percent = (100m / 418m) * x;
@@ -96,23 +96,54 @@
                                     this.UpdateProgress(Convert.ToInt32(percent));
                                 });
 
-                        currentItem -= 0x220;
+                        currentItemAddress -= 0x220;
                         x++;
 
                         continue;
                     }
 
-                    // TODO: Implement the following
-                    /*
+                    // Dump each item memory block
                     var stream = new MemoryStream();
-                    this.tcpGecko.Dump(currentItem, currentItem + 0x70, stream);
-                    stream.Seek(0, SeekOrigin.Begin);
+                    this.tcpGecko.Dump(currentItemAddress, currentItemAddress + 0x70, stream);
 
-                    var buffer = new byte[4];
-                    stream.Read(buffer, 0, 4);
-                    var baseAddress = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
-                    */
+                    var unknown = this.ReadStream(stream, 4);
+                    var value = this.ReadStream(stream, 8);
+                    var equipped = this.ReadStream(stream, 12);
+                    var nameStart = this.ReadStream(stream, 28);
 
+                    stream.Seek(28, SeekOrigin.Begin);
+                    var builder = new StringBuilder();
+                    for (var i = 0; i < 36; i++)
+                    {
+                        var data = stream.ReadByte();
+                        if (data == 0)
+                        {
+                            break;
+                        }
+                        builder.Append((char)data);
+                    }
+
+                    var name = builder.ToString();
+
+                    var item = new Item
+                                   {
+                                       BaseAddress = currentItemAddress,
+                                       Page = Convert.ToInt32(page),
+                                       Unknown = Convert.ToInt32(unknown),
+                                       Value = value,
+                                       Equipped = equipped,
+                                       NameStart = nameStart,
+                                       Name = name,
+                                       Modifier1Value = this.ReadStream(stream, 92).ToString("x8").ToUpper(),
+                                       Modifier2Value = this.ReadStream(stream, 96).ToString("x8").ToUpper(),
+                                       Modifier3Value = this.ReadStream(stream, 100).ToString("x8").ToUpper(),
+                                       Modifier4Value = this.ReadStream(stream, 104).ToString("x8").ToUpper(),
+                                       Modifier5Value = this.ReadStream(stream, 108).ToString("x8").ToUpper()
+                                   };
+
+                    this.items.Add(item);
+
+                    /*
                     var item = new Item
                     {
                         BaseAddress = currentItem,
@@ -130,6 +161,7 @@
                     };
 
                     this.items.Add(item);
+                    */
 
                     var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(
@@ -139,7 +171,7 @@
                                 this.UpdateProgress(Convert.ToInt32(currentPercent));
                             });
 
-                    currentItem -= 0x220;
+                    currentItemAddress -= 0x220;
                     x++;
                 }
 
@@ -903,6 +935,17 @@
             var name = builder.ToString();
 
             return name;
+        }
+
+        private uint ReadStream(Stream stream, long offset)
+        {
+            var buffer = new byte[4];
+
+            stream.Seek(offset, SeekOrigin.Begin);
+            stream.Read(buffer, 0, 4);
+            var data = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
+
+            return data;
         }
 
         private TextBox GenerateGridTextBox(string value, string field, int x, int col)
