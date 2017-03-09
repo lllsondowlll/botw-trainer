@@ -9,7 +9,7 @@
       <Value Profile="(Default)">https://raw.githubusercontent.com/joffnerd/botw-trainer/master/</Value>
     </Setting>
     <Setting Name="CurrentVersion" Type="System.String" Scope="User">
-      <Value Profile="(Default)">1.9.7</Value>
+      <Value Profile="(Default)">2.0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
