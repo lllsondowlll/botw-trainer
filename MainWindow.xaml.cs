@@ -322,7 +322,7 @@
                     }
                 }
 
-                MessageBox.Show("Data sent. Please save/load the game if you changed the Item Value.");
+                MessageBox.Show("Data sent. Please save/load the game if you changed the 'Item Value'");
             }
 
             // Here we can poke the values as it has and immediate effect
@@ -428,6 +428,10 @@
 
                 this.SetCheats(selected);
             }
+
+            this.DebugData();
+            
+            Debug.UpdateLayout();
         }
 
         private void ExportClick(object sender, RoutedEventArgs e)
@@ -442,7 +446,7 @@
             var holder = new WrapPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
 
             // setup grid
-            var grid = this.GenerateTabGrid();
+            var grid = this.GenerateTabGrid(tab.Name);
 
             var x = 1;
             var list = this.items.Where(i => i.Page == page).OrderByDescending(i => i.BaseAddress);
@@ -474,6 +478,11 @@
                     IsReadOnly = true,
                     BorderThickness = new Thickness(0)
                 };
+
+                if (item.EquippedBool)
+                {
+                    name.Foreground = Brushes.Red;
+                }
 
                 Grid.SetRow(name, x);
                 Grid.SetColumn(name, 0);
@@ -643,20 +652,30 @@
 
             if (cheats.Contains(Cheat.MoonJump))
             {
-                codes.Add(0x03020000);
-                codes.Add(0x102F48A8);
-                codes.Add(0x00002000);
+                uint activator;
+                if (this.Controller.SelectedIndex == 0)
+                {
+                    activator = 0x112671AB;
+                }
+                else
+                {
+                    activator = 0x102F48AA;
+                }
+
+                codes.Add(0x09000000);
+                codes.Add(activator);
+                codes.Add(0x00000020);
                 codes.Add(0x00000000);
                 codes.Add(0x00020000);
                 codes.Add(0x439BF528);
-                codes.Add(0xBF400000);
+                codes.Add(0xBE800000);
                 codes.Add(0x00000000);
                 codes.Add(0xD0000000);
                 codes.Add(0xDEADCAFE);
 
-                codes.Add(0x04020000);
-                codes.Add(0x102F48A8);
-                codes.Add(0x00002000);
+                codes.Add(0x06000000);
+                codes.Add(activator);
+                codes.Add(0x00000020);
                 codes.Add(0x00000000);
                 codes.Add(0x00020000);
                 codes.Add(0x439BF528);
@@ -915,7 +934,7 @@
             return tb;
         }
 
-        private Grid GenerateTabGrid()
+        private Grid GenerateTabGrid(string tab)
         {
             var grid = new Grid
             {
@@ -959,17 +978,24 @@
             grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
-            for (int y = 1; y < 6; y++)
+            var headerNames = new[] { "Modifier 1", "Modifier 2", "Modifier 3", "Modifier 4", "Modifier 5" };
+
+            for (int y = 0; y < 5; y++)
             {
+                if (tab == "Food")
+                {
+                    headerNames = new[] { "Hearts Restored", "Duration", "Mod Value?", "Mod Type", "Mod Level" };
+                }
+
                 var header = new TextBlock
                 {
-                    Text = "Modifier " + y,
+                    Text = headerNames[y],
                     FontSize = 14,
                     FontWeight = FontWeights.Bold,
                     HorizontalAlignment = HorizontalAlignment.Center
                 };
                 Grid.SetRow(header, 0);
-                Grid.SetColumn(header, y + 1);
+                Grid.SetColumn(header, y + 2);
                 grid.Children.Add(header);
             }
 
