@@ -58,5 +58,17 @@ namespace BotwTrainer.Properties {
                 this["CurrentVersion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Warning {
+            get {
+                return ((int)(this["Warning"]));
+            }
+            set {
+                this["Warning"] = value;
+            }
+        }
     }
 }

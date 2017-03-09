@@ -100,15 +100,15 @@
             <TabItem Header="Debug" x:Name="Debug" Margin="0,0,0,0" Background="SeaGreen">
                 <WrapPanel Margin="0">
 
-                    <Button x:Name="Export" Content="Export" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" Width="75" Click="ExportClick" />
+                    <Button x:Name="Export" Content="Export" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="ExportClick" />
 
-                    <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="0,10,0,0" ClipboardCopyMode="IncludeHeader" Width="920">
+                    <DataGrid x:Name="DebugGrid" AutoGenerateColumns="False" Margin="10,10,0,0" ClipboardCopyMode="IncludeHeader" Width="920" Height="450">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Name" Width="180" Binding="{Binding Name}"/>
                             <DataGridTextColumn Header="Address" Width="80" Binding="{Binding BaseAddressHex, Mode=OneWay}"/>
                             <DataGridTextColumn Header="Type" Width="80" Binding="{Binding PageName, Mode=OneWay}"/>
                             <DataGridTextColumn Header="Value" Width="70" Binding="{Binding Value}"/>
-                            <DataGridCheckBoxColumn Header="Equipped" Width="30" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"/>
+                            <DataGridCheckBoxColumn Header="Equipped" Width="50" Binding="{Binding EquippedBool, Mode=OneWay}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="?" Width="30" Binding="{Binding Unknown}"/>
                             <DataGridTextColumn Header="Modifier1" Width="75" Binding="{Binding Modifier1Value, Mode=OneWay}"/>
                             <DataGridTextColumn Header="Modifier2" Width="75" Binding="{Binding Modifier2Value, Mode=OneWay}"/>
@@ -132,39 +132,46 @@
                             </Paragraph>
                             <Paragraph FontSize="13">
                                 <Run Text="Just some basic info to help get the most from this trainer. To start with this trainer is a little raw, it was built using PAL so"/>
+                                <Run Text=" "/>
                                 <Run FontWeight="Bold" Text="US may have issues."/>
-                                <Run Text="I am using it to help learn WPF and Assembly and other things so there are holes."/>
                             </Paragraph>
                             <Paragraph FontSize="13">
                                 <Run FontWeight="Bold" Text="Tabs: "/>
+                                <Run Text=" "/>
                                 <Run Text="The tabs have a colour, this is to identify how the data can be manipulated."/>
                                 <Run Text=" "/>
                                 <Run Foreground="CadetBlue" Text="Blue Tabs"/>
+                                <Run Text=" are things like Weapons that require you to Save/Load the game."/>
                                 <Run Text=" "/>
-                                <Run Text="are things like Weapons that require you to Save/Load the game."/>
+                                <Run Text=" "/>
                                 <Run Text=" "/>
                                 <Run Foreground="PaleVioletRed" Text="Violet Tabs"/>
                                 <Run Text=" "/>
-                                <Run Text="are  things  like Mushrooms that you can modify immediately. Whatever changes you make"/>
-                                <Run Text=" the Save Button is linked to the current Tab"/>
                                 <Run Text=" "/>
-                                <Run Text="so"/>
+                                <Run Text=" "/>
+                                <Run Text="are  things  like Mushrooms that you can modify immediately. Whatever changes you make"/>
+                                <Run Text=" "/>
+                                <Run Text=" the Save Button is linked to the current Tab"/>
+                                <Run Text=" so"/>
                                 <Run Text=" you"/>
                                 <Run Text=" "/>
                                 <Run FontWeight="Bold" Text="must click Save at the bottom."/>
                                 <Run Text=" "/>
                                 <Run Foreground="SeaGreen" Text="Green Tabs"/>
-                                <Run Text=" "/>
-                                <Run Text="are used for other functions like this Help Tab and Debug."/>
+                                <Run Text=" are used for other functions like this Help Tab and Debug."/>
                             </Paragraph>
                             <Paragraph FontSize="13">
                                 <Run Text="If you change a Shield Value and click Save there will be no immediate effect, you then have to Save/Load your game. If you Edit your Materials however and click Save you should see this reflected in your inventory by closing and opening it again."/>
                             </Paragraph>
                             <Paragraph FontSize="13">
-                                <Run Text="Debug tab has no function other than a complete list of current items."/>
+                                <Run FontWeight="Bold" Text="Debug tab "/>
+                                <Run Text="has no function other than a complete list of current items"/>
+                                <Run Text="."/>
+                                <Run Text=" You can export the data to csv."/>
                             </Paragraph>
-                            <Paragraph>
-                                <Run/>
+                            <Paragraph FontSize="13">
+                                <Run FontWeight="Bold" Text="Modifier"/>
+                                <Run Text=" boxes aren't always used. For food see post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"/>
                             </Paragraph>
                         </FlowDocument>
                     </RichTextBox>

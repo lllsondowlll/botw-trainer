@@ -54,7 +54,16 @@
 
             this.Title = string.Format("{0} v{1}", this.Title, this.version);
 
-            var client = new WebClient { BaseAddress = Settings.Default.VersionUrl, Encoding = Encoding.UTF8 };
+            var client = new WebClient
+                             {
+                                 BaseAddress = Settings.Default.VersionUrl,
+                                 Encoding = Encoding.UTF8,
+                                 CachePolicy =
+                                     new System.Net.Cache.RequestCachePolicy(
+                                     System.Net.Cache.RequestCacheLevel.BypassCache)
+                             };
+
+            client.Headers.Add("Cache-Control", "no-cache");
             client.DownloadStringCompleted += this.ClientDownloadStringCompleted;
             client.DownloadStringAsync(new Uri(string.Format("{0}{1}", client.BaseAddress, "version.txt")));
 
@@ -220,8 +229,6 @@
                 this.Notification.Content = string.Format("Items found: {0}", this.itemsFound);
 
                 this.ToggleControls("DataLoaded");
-
-                MessageBox.Show("WARNING: Item names are now editable. Using bad data may mess up your game so use with care.");
             }
         }
 
@@ -235,6 +242,15 @@
 
                 if (this.connected)
                 {
+                    var shown = Settings.Default.Warning;
+
+                    if (shown < 3)
+                    {
+                        Settings.Default.Warning++;
+
+                        MessageBox.Show("WARNING: Item names are now editable. Using bad data may mess up your game so use with care.");
+                    }
+
                     Settings.Default.IpAddress = IpAddress.Text;
                     Settings.Default.Save();
 
@@ -530,9 +546,9 @@
                 {
                     Text = item.Name,
                     ToolTip = item.NameStart.ToString("x8").ToUpper(), 
-                    Margin = new Thickness(0,0,10,0),
+                    Margin = new Thickness(0,0,0,0),
                     Height = 22,
-                    Width = 250,
+                    Width = 230,
                     IsReadOnly = false,
                     Name = "Name_" + item.NameStartHex
                 };
@@ -583,18 +599,15 @@
 
             grid.Height = x * 35;
 
-            if (tab.Name == "Food")
+            holder.Children.Add(new TextBox
             {
-                holder.Children.Add(new TextBox 
-                {
-                    Background = Brushes.Transparent,
-                    BorderThickness = new Thickness(0),
-                    Margin = new Thickness(10, 10, 0, 0),
-                    IsReadOnly = true,
-                    TextWrapping = TextWrapping.Wrap,
-                    Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
-                });
-            }
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Margin = new Thickness(10, 10, 0, 0),
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.Wrap,
+                Text = "Modifiers aren't used for all Types/Items. See help for more info."
+            });
 
             holder.Children.Add(grid);
 
@@ -994,7 +1007,7 @@
                 VerticalAlignment = VerticalAlignment.Top
             };
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition{ Width = new GridLength(250) });
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             grid.RowDefinitions.Add(new RowDefinition());
@@ -1005,7 +1018,7 @@
                 Text = "Item Name",
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
-                Width = 250
+                Width = 230
             };
             Grid.SetRow(itemHeader, 0);
             Grid.SetColumn(itemHeader, 0);
