@@ -109,7 +109,7 @@
                     var unknown = this.ReadStream(stream, 4);
                     var value = this.ReadStream(stream, 8);
                     var equipped = this.ReadStream(stream, 12);
-                    var nameStart = this.ReadStream(stream, 28);
+                    var nameStart = currentItemAddress + 0x1C;
 
                     stream.Seek(28, SeekOrigin.Begin);
                     var builder = new StringBuilder();
@@ -220,6 +220,8 @@
                 this.Notification.Content = string.Format("Items found: {0}", this.itemsFound);
 
                 this.ToggleControls("DataLoaded");
+
+                MessageBox.Show("WARNING: Item names are now editable. Using bad data may mess up your game so use with care.");
             }
         }
 
@@ -395,12 +397,37 @@
 
             foreach (var item in collection)
             {
-                var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
+                // Name
+                var foundTextBox = (TextBox)this.FindName("Name_" + item.NameStartHex);
+                if (foundTextBox != null)
+                {
+                    var newName = Encoding.Default.GetBytes(foundTextBox.Text);
+                    var length = newName.Length;
+
+                    //clear current name
+                    this.tcpGecko.poke32(item.NameStart, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x4, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x8, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0xC, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x10, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x14, 0x0);
+
+                    uint x = 0x0;
+                    foreach (var b in newName)
+                    {
+                        this.tcpGecko.poke08(item.NameStart + x, b);
+                        x = x + 0x1;
+                    }
+                }
+
+                // Value
+                foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                 if (foundTextBox != null)
                 {
                     this.tcpGecko.poke32(item.BaseAddress + 0x8, Convert.ToUInt32(foundTextBox.Text));
                 }
 
+                // Mods
                 this.FindAndPoke(item.Modifier1Address, item.BaseAddress + 0x5c);
                 this.FindAndPoke(item.Modifier2Address, item.BaseAddress + 0x60);
                 this.FindAndPoke(item.Modifier3Address, item.BaseAddress + 0x64);
@@ -502,14 +529,20 @@
                 var name = new TextBox
                 {
                     Text = item.Name,
-                    ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
-                    //ToolTip = item.Address.ToString("x8").ToUpper(), 
+                    ToolTip = item.NameStart.ToString("x8").ToUpper(), 
                     Margin = new Thickness(0,0,10,0),
                     Height = 22,
                     Width = 250,
-                    IsReadOnly = true,
-                    BorderThickness = new Thickness(0)
+                    IsReadOnly = false,
+                    Name = "Name_" + item.NameStartHex
                 };
+
+                var check = (TextBox)this.FindName("Name_" + item.NameStartHex);
+                if (check != null)
+                {
+                    this.UnregisterName("Name_" + item.NameStartHex);
+                }
+                this.RegisterName("Name_" + item.NameStartHex, name);
 
                 if (item.EquippedBool)
                 {
@@ -909,32 +942,6 @@
                     this.tcpGecko.poke32(address, val);
                 }
             }
-        }
-
-        private string ReadString(uint addr)
-        {
-            //string result = Encoding.UTF8.GetString(bytearray);
-
-            var dump = new MemoryStream();
-            this.tcpGecko.Dump(addr, addr + 0x24, dump);
-            dump.Position = 0;
-
-            var builder = new StringBuilder();
-
-            for (var i = 0; i < dump.Length; i++)
-            {
-                var data = dump.ReadByte();
-                if (data == 0)
-                {
-                    break;
-                }
-
-                builder.Append((char)data);
-            }
-
-            var name = builder.ToString();
-
-            return name;
         }
 
         private uint ReadStream(Stream stream, long offset)

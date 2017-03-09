@@ -9,6 +9,14 @@
 
         public uint NameStart { get; set; }
 
+        public string NameStartHex
+        {
+            get
+            {
+                return this.NameStart.ToString("x8").ToUpper();
+            }
+        }
+
         public uint BaseAddress { get; set; }
 
         public string BaseAddressHex
