@@ -49,13 +49,25 @@ namespace BotwTrainer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.9.5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2.0")]
         public string CurrentVersion {
             get {
                 return ((string)(this["CurrentVersion"]));
             }
             set {
                 this["CurrentVersion"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Warning {
+            get {
+                return ((int)(this["Warning"]));
+            }
+            set {
+                this["Warning"] = value;
             }
         }
     }

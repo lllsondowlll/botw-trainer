@@ -53,7 +53,16 @@
 
             this.Title = string.Format("{0} v{1}", this.Title, this.version);
 
-            var client = new WebClient { BaseAddress = Settings.Default.VersionUrl, Encoding = Encoding.UTF8 };
+            var client = new WebClient
+                             {
+                                 BaseAddress = Settings.Default.VersionUrl,
+                                 Encoding = Encoding.UTF8,
+                                 CachePolicy =
+                                     new System.Net.Cache.RequestCachePolicy(
+                                     System.Net.Cache.RequestCacheLevel.BypassCache)
+                             };
+
+            client.Headers.Add("Cache-Control", "no-cache");
             client.DownloadStringCompleted += this.ClientDownloadStringCompleted;
             client.DownloadStringAsync(new Uri(string.Format("{0}{1}", client.BaseAddress, "version.txt")));
 
@@ -80,12 +89,12 @@
             {
                 var x = 0;
 
-                var currentItem = ItemEnd;
+                var currentItemAddress = ItemEnd;
 
-                while (currentItem >= ItemStart)
+                while (currentItemAddress >= ItemStart)
                 {
                     // Skip FFFFFFFF invalild items. Usuauly end of the list
-                    var page = this.tcpGecko.peek(currentItem);
+                    var page = this.tcpGecko.peek(currentItemAddress);
                     if (page > 9)
                     {
                         var percent = (100m / 418m) * x;
@@ -96,23 +105,54 @@
                                     this.UpdateProgress(Convert.ToInt32(percent));
                                 });
 
-                        currentItem -= 0x220;
+                        currentItemAddress -= 0x220;
                         x++;
 
                         continue;
                     }
 
-                    // TODO: Implement the following
-                    /*
+                    // Dump each item memory block
                     var stream = new MemoryStream();
-                    this.tcpGecko.Dump(currentItem, currentItem + 0x70, stream);
-                    stream.Seek(0, SeekOrigin.Begin);
+                    this.tcpGecko.Dump(currentItemAddress, currentItemAddress + 0x70, stream);
 
-                    var buffer = new byte[4];
-                    stream.Read(buffer, 0, 4);
-                    var baseAddress = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
-                    */
+                    var unknown = this.ReadStream(stream, 4);
+                    var value = this.ReadStream(stream, 8);
+                    var equipped = this.ReadStream(stream, 12);
+                    var nameStart = currentItemAddress + 0x1C;
 
+                    stream.Seek(28, SeekOrigin.Begin);
+                    var builder = new StringBuilder();
+                    for (var i = 0; i < 36; i++)
+                    {
+                        var data = stream.ReadByte();
+                        if (data == 0)
+                        {
+                            break;
+                        }
+                        builder.Append((char)data);
+                    }
+
+                    var name = builder.ToString();
+
+                    var item = new Item
+                                   {
+                                       BaseAddress = currentItemAddress,
+                                       Page = Convert.ToInt32(page),
+                                       Unknown = Convert.ToInt32(unknown),
+                                       Value = value,
+                                       Equipped = equipped,
+                                       NameStart = nameStart,
+                                       Name = name,
+                                       Modifier1Value = this.ReadStream(stream, 92).ToString("x8").ToUpper(),
+                                       Modifier2Value = this.ReadStream(stream, 96).ToString("x8").ToUpper(),
+                                       Modifier3Value = this.ReadStream(stream, 100).ToString("x8").ToUpper(),
+                                       Modifier4Value = this.ReadStream(stream, 104).ToString("x8").ToUpper(),
+                                       Modifier5Value = this.ReadStream(stream, 108).ToString("x8").ToUpper()
+                                   };
+
+                    this.items.Add(item);
+
+                    /*
                     var item = new Item
                     {
                         BaseAddress = currentItem,
@@ -130,6 +170,7 @@
                     };
 
                     this.items.Add(item);
+                    */
 
                     var currentPercent = (100m / 418m) * x;
                     Dispatcher.Invoke(
@@ -139,7 +180,7 @@
                                 this.UpdateProgress(Convert.ToInt32(currentPercent));
                             });
 
-                    currentItem -= 0x220;
+                    currentItemAddress -= 0x220;
                     x++;
                 }
 
@@ -201,6 +242,15 @@
 
                 if (this.connected)
                 {
+                    var shown = Settings.Default.Warning;
+
+                    if (shown < 3)
+                    {
+                        Settings.Default.Warning++;
+
+                        MessageBox.Show("WARNING: Item names are now editable. Using bad data may mess up your game so use with care.");
+                    }
+
                     Settings.Default.IpAddress = IpAddress.Text;
                     Settings.Default.Save();
 
@@ -322,7 +372,7 @@
                     }
                 }
 
-                MessageBox.Show("Data sent. Please save/load the game if you changed the Item Value.");
+                MessageBox.Show("Data sent. Please save/load the game if you changed the 'Item Value'");
             }
 
             // Here we can poke the values as it has and immediate effect
@@ -363,12 +413,37 @@
 
             foreach (var item in collection)
             {
-                var foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
+                // Name
+                var foundTextBox = (TextBox)this.FindName("Name_" + item.NameStartHex);
+                if (foundTextBox != null)
+                {
+                    var newName = Encoding.Default.GetBytes(foundTextBox.Text);
+                    var length = newName.Length;
+
+                    //clear current name
+                    this.tcpGecko.poke32(item.NameStart, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x4, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x8, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0xC, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x10, 0x0);
+                    this.tcpGecko.poke32(item.NameStart + 0x14, 0x0);
+
+                    uint x = 0x0;
+                    foreach (var b in newName)
+                    {
+                        this.tcpGecko.poke08(item.NameStart + x, b);
+                        x = x + 0x1;
+                    }
+                }
+
+                // Value
+                foundTextBox = (TextBox)this.FindName("Item_" + item.BaseAddressHex);
                 if (foundTextBox != null)
                 {
                     this.tcpGecko.poke32(item.BaseAddress + 0x8, Convert.ToUInt32(foundTextBox.Text));
                 }
 
+                // Mods
                 this.FindAndPoke(item.Modifier1Address, item.BaseAddress + 0x5c);
                 this.FindAndPoke(item.Modifier2Address, item.BaseAddress + 0x60);
                 this.FindAndPoke(item.Modifier3Address, item.BaseAddress + 0x64);
@@ -428,6 +503,10 @@
 
                 this.SetCheats(selected);
             }
+
+            this.DebugData();
+            
+            Debug.UpdateLayout();
         }
 
         private void ExportClick(object sender, RoutedEventArgs e)
@@ -442,7 +521,7 @@
             var holder = new WrapPanel { Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Top};
 
             // setup grid
-            var grid = this.GenerateTabGrid();
+            var grid = this.GenerateTabGrid(tab.Name);
 
             var x = 1;
             var list = this.items.Where(i => i.Page == page).OrderByDescending(i => i.BaseAddress);
@@ -466,14 +545,25 @@
                 var name = new TextBox
                 {
                     Text = item.Name,
-                    ToolTip = BitConverter.ToString(Encoding.Default.GetBytes(item.Name)).Replace("-", string.Empty),
-                    //ToolTip = item.Address.ToString("x8").ToUpper(), 
-                    Margin = new Thickness(0,0,10,0),
+                    ToolTip = item.NameStart.ToString("x8").ToUpper(), 
+                    Margin = new Thickness(0,0,0,0),
                     Height = 22,
-                    Width = 250,
-                    IsReadOnly = true,
-                    BorderThickness = new Thickness(0)
+                    Width = 230,
+                    IsReadOnly = false,
+                    Name = "Name_" + item.NameStartHex
                 };
+
+                var check = (TextBox)this.FindName("Name_" + item.NameStartHex);
+                if (check != null)
+                {
+                    this.UnregisterName("Name_" + item.NameStartHex);
+                }
+                this.RegisterName("Name_" + item.NameStartHex, name);
+
+                if (item.EquippedBool)
+                {
+                    name.Foreground = Brushes.Red;
+                }
 
                 Grid.SetRow(name, x);
                 Grid.SetColumn(name, 0);
@@ -509,18 +599,15 @@
 
             grid.Height = x * 35;
 
-            if (tab.Name == "Food")
+            holder.Children.Add(new TextBox
             {
-                holder.Children.Add(new TextBox 
-                {
-                    Background = Brushes.Transparent,
-                    BorderThickness = new Thickness(0),
-                    Margin = new Thickness(10, 10, 0, 0),
-                    IsReadOnly = true,
-                    TextWrapping = TextWrapping.Wrap,
-                    Text = "See post: https://gbatemp.net/threads/post-your-wiiu-cheat-codes-here.395443/page-303#post-7156278"
-                });
-            }
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Margin = new Thickness(10, 10, 0, 0),
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.Wrap,
+                Text = "Modifiers aren't used for all Types/Items. See help for more info."
+            });
 
             holder.Children.Add(grid);
 
@@ -643,20 +730,30 @@
 
             if (cheats.Contains(Cheat.MoonJump))
             {
-                codes.Add(0x03020000);
-                codes.Add(0x102F48A8);
-                codes.Add(0x00002000);
+                uint activator;
+                if (this.Controller.SelectedIndex == 0)
+                {
+                    activator = 0x112671AB;
+                }
+                else
+                {
+                    activator = 0x102F48AA;
+                }
+
+                codes.Add(0x09000000);
+                codes.Add(activator);
+                codes.Add(0x00000020);
                 codes.Add(0x00000000);
                 codes.Add(0x00020000);
                 codes.Add(0x439BF528);
-                codes.Add(0xBF400000);
+                codes.Add(0xBE800000);
                 codes.Add(0x00000000);
                 codes.Add(0xD0000000);
                 codes.Add(0xDEADCAFE);
 
-                codes.Add(0x04020000);
-                codes.Add(0x102F48A8);
-                codes.Add(0x00002000);
+                codes.Add(0x06000000);
+                codes.Add(activator);
+                codes.Add(0x00000020);
                 codes.Add(0x00000000);
                 codes.Add(0x00020000);
                 codes.Add(0x439BF528);
@@ -860,30 +957,15 @@
             }
         }
 
-        private string ReadString(uint addr)
+        private uint ReadStream(Stream stream, long offset)
         {
-            //string result = Encoding.UTF8.GetString(bytearray);
+            var buffer = new byte[4];
 
-            var dump = new MemoryStream();
-            this.tcpGecko.Dump(addr, addr + 0x24, dump);
-            dump.Position = 0;
+            stream.Seek(offset, SeekOrigin.Begin);
+            stream.Read(buffer, 0, 4);
+            var data = ByteSwap.Swap(BitConverter.ToUInt32(buffer, 0));
 
-            var builder = new StringBuilder();
-
-            for (var i = 0; i < dump.Length; i++)
-            {
-                var data = dump.ReadByte();
-                if (data == 0)
-                {
-                    break;
-                }
-
-                builder.Append((char)data);
-            }
-
-            var name = builder.ToString();
-
-            return name;
+            return data;
         }
 
         private TextBox GenerateGridTextBox(string value, string field, int x, int col)
@@ -915,7 +997,7 @@
             return tb;
         }
 
-        private Grid GenerateTabGrid()
+        private Grid GenerateTabGrid(string tab)
         {
             var grid = new Grid
             {
@@ -925,7 +1007,7 @@
                 VerticalAlignment = VerticalAlignment.Top
             };
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition{ Width = new GridLength(250) });
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             grid.RowDefinitions.Add(new RowDefinition());
@@ -936,7 +1018,7 @@
                 Text = "Item Name",
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
-                Width = 250
+                Width = 230
             };
             Grid.SetRow(itemHeader, 0);
             Grid.SetColumn(itemHeader, 0);
@@ -959,17 +1041,24 @@
             grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
-            for (int y = 1; y < 6; y++)
+            var headerNames = new[] { "Modifier 1", "Modifier 2", "Modifier 3", "Modifier 4", "Modifier 5" };
+
+            for (int y = 0; y < 5; y++)
             {
+                if (tab == "Food")
+                {
+                    headerNames = new[] { "Hearts Restored", "Duration", "Mod Value?", "Mod Type", "Mod Level" };
+                }
+
                 var header = new TextBlock
                 {
-                    Text = "Modifier " + y,
+                    Text = headerNames[y],
                     FontSize = 14,
                     FontWeight = FontWeights.Bold,
                     HorizontalAlignment = HorizontalAlignment.Center
                 };
                 Grid.SetRow(header, 0);
-                Grid.SetColumn(header, y + 1);
+                Grid.SetColumn(header, y + 2);
                 grid.Children.Add(header);
             }
 

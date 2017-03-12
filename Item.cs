@@ -9,6 +9,7 @@
 
         public uint NameStart { get; set; }
 
+<<<<<<< HEAD
         public string NameDefined
         {
             get
@@ -17,6 +18,16 @@
                 return Definitions.Inventory.ToString();
             }
         }
+=======
+        public string NameStartHex
+        {
+            get
+            {
+                return this.NameStart.ToString("x8").ToUpper();
+            }
+        }
+
+>>>>>>> refs/remotes/joffnerd/master
         public uint BaseAddress { get; set; }
 
         public string BaseAddressHex
