@@ -13,7 +13,6 @@
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Media;
-
     using BotwTrainer.Properties;
 
     /// <summary>
@@ -59,6 +58,7 @@
             client.DownloadStringAsync(new Uri(string.Format("{0}{1}", client.BaseAddress, "version.txt")));
 
             this.items = new List<Item>();
+
         }
 
         private enum Cheat

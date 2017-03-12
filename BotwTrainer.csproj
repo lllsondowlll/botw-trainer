@@ -83,6 +83,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Item.cs" />
+    <Compile Include="Definitions.cs" />
     <Compile Include="MemAreas.cs" />
     <Compile Include="TCPConn.cs" />
     <Compile Include="TCPGecko.cs" />

@@ -9,6 +9,14 @@
 
         public uint NameStart { get; set; }
 
+        public string NameDefined
+        {
+            get
+            {
+                var Definitions = new Definitions();
+                return Definitions.Inventory.ToString();
+            }
+        }
         public uint BaseAddress { get; set; }
 
         public string BaseAddressHex
@@ -143,7 +151,6 @@
                         name = "Key Items";
                         break;
                 }
-
                 return name;
             }
         }
